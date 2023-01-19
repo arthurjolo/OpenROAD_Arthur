@@ -189,13 +189,22 @@ void GlobalRouter::applyAdjustments(int min_routing_layer,
                                     int max_routing_layer)
 {
   fastroute_->initEdges();
+  std::cout<<"grid capacity (0,0):"<< fastroute_->getEdgeCapacity(0,0,1,0,2) <<"\n";
   computeGridAdjustments(min_routing_layer, max_routing_layer);
+  std::cout<<"aqui1\n";
   computeTrackAdjustments(min_routing_layer, max_routing_layer);
+  std::cout<<"grid capacity (0,0):"<< fastroute_->getEdgeCapacity(0,0,1,0,2) <<"\n";
+  std::cout<<"aqui2\n";
   computeObstructionsAdjustments();
   std::vector<int> track_space = grid_->getMinWidths();
   fastroute_->initBlockedIntervals(track_space);
+  std::cout<<"aqui3\n";
   computeUserGlobalAdjustments(min_routing_layer, max_routing_layer);
+  std::cout<<"aqui4\n";
   computeUserLayerAdjustments(max_routing_layer);
+
+  std::cout<<"aqui5\n";
+  //computePinOffsetAdjustments();
 
   for (RegionAdjustment region_adjustment : region_adjustments_) {
     odb::dbTechLayer* layer = routing_layers_[region_adjustment.getLayer()];
@@ -305,6 +314,16 @@ void GlobalRouter::globalRoute(bool save_guides)
     logger_->info(GRT, 14, "Routed nets: {}", routes_.size());
   if (save_guides)
     saveGuides();
+  std::cout<<"minlayer : "<<min_layer<<"\n";
+  for (auto [level, routing_layer] : routing_layers_) {
+    if (level < min_layer || level > max_layer && max_layer > 0){
+      continue;
+    }
+    bool horizintal = (routing_layer->getDirection() == odb::dbTechLayerDir::HORIZONTAL);
+    std::cout<<"layer "<<routing_layer->getConstName()<< " ("<<level<<") horizontal?"<<horizintal<<"\n";
+    fastroute_->dump_edges_3D_cap(level-1, horizintal);
+  }
+  std::cout<<"fineshed\n";
 }
 
 void GlobalRouter::updateDbCongestion()
@@ -1869,6 +1888,42 @@ void GlobalRouter::connectPadPins(NetRouteMap& routes)
         || net->getNumPins() > 1) {
       for (GSegment& segment : pad_pins_connections_[db_net]) {
         route.push_back(segment);
+      }
+    }
+  }
+}
+
+void GlobalRouter::computePinOffsetAdjustments() {
+  for(auto net : block_->getNets()) {
+    if (pad_pins_connections_.find(net) != pad_pins_connections_.end()){
+      for(GSegment& segment : pad_pins_connections_[net]) {
+        std::cout<<"("<<segment.init_x<<", "<<segment.init_y<<") --> ("<<segment.final_x<<", "<<segment.final_y<<") "<<segment.final_layer<<"\n";
+        int tile_size = grid_->getTileSize();
+        int die_area_min_x = grid_->getXMin();
+        int die_area_min_y = grid_->getYMin();
+        int gcell_id_x = floor((float) ((segment.init_x - die_area_min_x) / tile_size));
+        int gcell_id_y = floor((float) ((segment.init_y - die_area_min_y) / tile_size));
+        //odb::Point grid_position = odb::Point(segment.init_x, segment.init_y);
+        //grid_position = grid_->getPositionOnGrid(grid_position);
+        //std::cout<<"  grid position for first point: ("<<gcell_id_x<<", "<<gcell_id_y<<"), curr_cap :";
+        if (segment.init_y == segment.final_y){
+          for (int i = 0; i < gcells_offset_; i++) {
+            int curr_cap = fastroute_->getEdgeCapacity(gcell_id_x + i, gcell_id_y, gcell_id_x + i + 1, gcell_id_y, segment.init_layer);
+            std::cout<<curr_cap<<"\n";
+            curr_cap -= 1;
+            if (curr_cap < 0){
+              std::cout<<"Underflow na capacidade, net: "<<net->getName()<<"\n";
+            }
+            fastroute_->addAdjustment(gcell_id_x + i, gcell_id_y, gcell_id_x + i + 1, gcell_id_y, segment.init_layer, curr_cap, true);
+          }
+        } else if (segment.init_x == segment.final_x) {
+          for (int i = 0; i < gcells_offset_; i++) {
+            int curr_cap = fastroute_->getEdgeCapacity(gcell_id_x + i, gcell_id_y, gcell_id_x, gcell_id_y + i + 1, segment.init_layer);
+            std::cout<<curr_cap<<", Não é pra acontecer\n";
+            curr_cap -= 1;
+            fastroute_->addAdjustment(gcell_id_x, gcell_id_y + i, gcell_id_x, gcell_id_y + i + 1, segment.init_layer, curr_cap, true);
+          }
+        }
       }
     }
   }
