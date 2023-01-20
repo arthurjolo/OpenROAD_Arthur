@@ -1542,4 +1542,32 @@ void FrNet::reset(odb::dbNet* db_net,
   pin_l_.clear();
 }
 
+void FastRouteCore::dump_edges_3D_cap(int layer, bool horizontal)
+{
+  for (int y = y_grid_-1; y >= 0; y--) {
+    for (int x = 0; x < x_grid_; x++) {
+      if (horizontal) {
+        printf("%2d ", h_edges_3D_[layer][y][x].cap);
+      } else {
+        printf("%2d ", v_edges_3D_[layer][y][x].cap);
+      }
+    }
+    printf("\n");
+  }
+}
+
+void FastRouteCore::dump_edges_3D_usage(int layer, bool horizontal)
+{
+  for (int y = y_grid_-1; y >= 0; y--) {
+    for (int x = 0; x < x_grid_; x++) {
+      if (horizontal) {
+        printf("%2d ", h_edges_3D_[layer][y][x].cap-h_edges_3D_[layer][y][x].usage);
+      } else {
+        printf("%2d ", v_edges_3D_[layer][y][x].cap-v_edges_3D_[layer][y][x].usage);
+      }
+    }
+    printf("\n");
+  }
+}
+
 }  // namespace grt

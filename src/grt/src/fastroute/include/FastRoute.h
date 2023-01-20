@@ -198,6 +198,9 @@ class FastRouteCore
   const odb::dbNet* getDebugNet();
   bool hasSaveSttInput();
 
+  void dump_edges_3D_cap(int layer, bool horizontal);
+  void dump_edges_3D_usage(int layer, bool horizontal);
+
  private:
   int getEdgeCapacity(FrNet* net, int x1, int y1, EdgeDirection direction);
   void getNetId(odb::dbNet* db_net, int& net_id, bool& exists);
