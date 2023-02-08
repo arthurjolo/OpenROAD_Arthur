@@ -451,6 +451,7 @@ class FastRouteCore
   void printTree3D(int netID);
   void check2DEdgesUsage();
   void verify2DEdgesUsage();
+  void verify3DEdgesUsage();
   void layerAssignment();
   void copyBR(void);
   void copyRS(void);

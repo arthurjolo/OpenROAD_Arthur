@@ -32,6 +32,7 @@
 
 #include <algorithm>
 #include <queue>
+#include <iostream>
 
 #include "DataType.h"
 #include "FastRoute.h"
@@ -1331,28 +1332,110 @@ void FastRouteCore::verify2DEdgesUsage()
             }
           }
         }
+      } else if (treeedge->route.type == RouteType::MazeRoute) {
+        for (int k = 0; k < treeedge->route.routelen;
+            k++) {  // remove the usages of the old edges
+          if (treeedge->route.gridsX[k] == treeedge->route.gridsX[k + 1]) {
+            if (treeedge->route.gridsY[k] != treeedge->route.gridsY[k + 1]) {
+              const int min_y = std::min(treeedge->route.gridsY[k],
+                                        treeedge->route.gridsY[k + 1]);
+              v_edges[min_y][treeedge->route.gridsX[k]]++;
+            }
+          } else {
+            const int min_x = std::min(treeedge->route.gridsX[k],
+                                      treeedge->route.gridsX[k + 1]);
+            h_edges[treeedge->route.gridsY[k]][min_x]++;
+          }
+        }
       }
     }
   }
   for (int y = 0; y < y_grid_ - 1; ++y) {
     for (int x = 0; x < x_grid_; ++x) {
-      if (v_edges[y][x] != v_edges_[y][x].est_usage) {
+      if (v_edges[y][x] != v_edges_[y][x].usage) {
         logger_->error(GRT,
                        247,
                        "v_edge mismatch {} vs {}",
                        v_edges[y][x],
-                       v_edges_[y][x].est_usage);
+                       v_edges_[y][x].usage);
       }
     }
   }
   for (int y = 0; y < y_grid_; ++y) {
     for (int x = 0; x < x_grid_ - 1; ++x) {
-      if (h_edges[y][x] != h_edges_[y][x].est_usage) {
+      if (h_edges[y][x] != h_edges_[y][x].usage) {
         logger_->error(GRT,
                        248,
                        "h_edge mismatch {} vs {}",
                        h_edges[y][x],
-                       h_edges_[y][x].est_usage);
+                       h_edges_[y][x].usage);
+      }
+    }
+  }
+}
+
+void FastRouteCore::verify3DEdgesUsage()
+{
+  multi_array<int, 3> v_edges(boost::extents[num_layers_][y_grid_][x_grid_]);
+  multi_array<int, 3> h_edges(boost::extents[num_layers_][y_grid_][x_grid_]);
+
+  for (int netID = 0; netID < netCount(); netID++) {
+    const auto& treenodes = sttrees_[netID].nodes;
+    const auto& treeedges = sttrees_[netID].edges;
+    for (int edgeID = 0; edgeID < sttrees_[netID].num_edges(); edgeID++) {
+      const TreeEdge* treeedge = &(treeedges[edgeID]);
+      if (treeedge->len == 0) {
+        continue;
+      }
+      const int n1 = treeedge->n1;
+      const int n2 = treeedge->n2;
+      const int x1 = treenodes[n1].x;
+      const int y1 = treenodes[n1].y;
+      const int x2 = treenodes[n2].x;
+      const int y2 = treenodes[n2].y;
+
+      const int ymin = std::min(y1, y2);
+      const int ymax = std::max(y1, y2);
+      if (treeedge->route.type == RouteType::MazeRoute) {
+        for (int k = 0; k < treeedge->route.routelen;
+            k++) {  // remove the usages of the old edges
+          if (treeedge->route.gridsX[k] != treeedge->route.gridsX[k + 1]) {
+            const int min_x = std::min(treeedge->route.gridsX[k],
+                                      treeedge->route.gridsX[k + 1]);
+            h_edges[treeedge->route.gridsL[k]][treeedge->route.gridsY[k]][min_x]++;
+          } else if (treeedge->route.gridsY[k] != treeedge->route.gridsY[k + 1]){
+            const int min_y = std::min(treeedge->route.gridsY[k],
+                                      treeedge->route.gridsY[k + 1]);
+            v_edges[treeedge->route.gridsL[k]][min_y][treeedge->route.gridsX[k]]++;
+          }
+        }
+      }
+    }
+  }
+  for (int y = 0; y < y_grid_; ++y) {
+    for (int x = 0; x < x_grid_; ++x) {
+      for (int l = 0; l < num_layers_; ++l) {
+        if (v_edges[l][y][x] != v_edges_3D_[l][y][x].usage) {
+          std::cout<<"l: "<<l<<"\ny: "<<y<<"x: "<<x<<"\n";
+          logger_->error(GRT,
+                        249,
+                        "v_edge mismatch {} vs {}",
+                        v_edges[l][y][x],
+                        v_edges_3D_[l][y][x].usage);
+        }
+      }
+    }
+  }
+  for (int y = 0; y < y_grid_; ++y) {
+    for (int x = 0; x < x_grid_ - 1; ++x) {
+      for (int l = 0; l < num_layers_; ++l) {
+        if (h_edges[l][y][x] != h_edges_3D_[l][y][x].usage) {
+          logger_->error(GRT,
+                        250,
+                        "h_edge mismatch {} vs {}",
+                        h_edges[l][y][x],
+                        h_edges_3D_[l][y][x].usage);
+        }
       }
     }
   }
