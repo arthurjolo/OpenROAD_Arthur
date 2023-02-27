@@ -467,11 +467,27 @@ void InitFloorplan::makeTracks()
   for (auto layer : block_->getDataBase()->getTech()->getLayers()) {
     if (layer->getType() == dbTechLayerType::ROUTING
         && layer->getRoutingLevel() != 0) {
-      makeTracks(layer,
+      char* layer_name;
+      layer->getDbName(layer_name);
+      std::cout<<"\n\nOIIIIIIIIIIII\n\n"; 
+      if (strcmp(layer_name, "M2")) {
+        std::cout<<"deu certo esse nome\npitch: "<<layer->getPitch()<<"\n";
+        layer->setFistLastPitch(45,36);
+      }
+      if (layer->getFistLastPitch() > 0) {
+        makeTracksNonUniform(layer,
+                 layer->getOffsetX(),
+                 layer->getPitchX(),
+                 layer->getOffsetY(),
+                 layer->getPitchY(),
+                 layer->getFistLastPitch());
+      } else {
+        makeTracks(layer,
                  layer->getOffsetX(),
                  layer->getPitchX(),
                  layer->getOffsetY(),
                  layer->getPitchY());
+      }
     }
   }
 }
@@ -554,6 +570,84 @@ void InitFloorplan::makeTracks(odb::dbTechLayer* layer,
   }
 
   grid->addGridPatternY(origin_y, y_track_count, y_pitch);
+}
+
+void InitFloorplan::makeTracksNonUniform(odb::dbTechLayer* layer,
+                               int x_offset,
+                               int x_pitch,
+                               int y_offset,
+                               int y_pitch,
+                               int first_last_pitch)
+{
+  if (layer->getDirection() != dbTechLayerDir::HORIZONTAL) {
+    logger_->error(
+        IFP,
+        50,
+        "Non horizontal layer uses property LEF58_PITCH.");
+  }
+  auto rows = block_->getRows();
+  int cell_row_height = rows.begin()->getSite()->getHeight();
+  utl::Validator v(logger_, IFP);
+  v.check_non_null("layer", layer, 38);
+  v.check_non_negative("x_offset", x_offset, 39);
+  v.check_positive("x_pitch", x_pitch, 40);
+  v.check_non_negative("y_offset", y_offset, 41);
+  v.check_positive("y_pitch", y_pitch, 42);
+
+  Rect die_area = block_->getDieArea();
+
+  if (x_offset == 0) {
+    x_offset = x_pitch;
+  }
+  if (y_offset == 0) {
+    y_offset = y_pitch;
+  }
+
+  if (x_offset > die_area.dx()) {
+    logger_->warn(
+        IFP,
+        40,
+        "Track pattern for {} will be skipped due to x_offset > die width.",
+        layer->getName());
+    return;
+  }
+  if (y_offset > die_area.dy()) {
+    logger_->warn(
+        IFP,
+        41,
+        "Track pattern for {} will be skipped due to y_offset > die height.",
+        layer->getName());
+    return;
+  }
+
+  auto grid = block_->findTrackGrid(layer);
+  if (!grid) {
+    grid = dbTrackGrid::create(block_, layer);
+  }
+
+  int layer_min_width = layer->getMinWidth();
+
+  auto x_track_count = int((die_area.dx() - x_offset) / x_pitch) + 1;
+  int origin_x = die_area.xMin() + x_offset;
+  //Check if the track origin is not usable during routing
+
+  if (origin_x - layer_min_width / 2 < die_area.xMin()) {
+    origin_x += x_pitch;
+    x_track_count--;
+  }
+
+  // Check if the last track is not usable during routing
+  int last_x = origin_x + (x_track_count - 1) * x_pitch;
+  if (last_x + layer_min_width / 2 > die_area.xMax()) {
+    x_track_count--;
+  }
+
+  grid->addGridPatternX(origin_x, x_track_count, x_pitch);
+
+  auto y_track_count = int((cell_row_height - 2 * first_last_pitch) / y_pitch) + 1;
+  int origin_y = die_area.yMin() + y_offset;
+
+  grid->addNonUniformGridY(origin_y, y_track_count, y_pitch, first_last_pitch, rows.size());
 }
 
 }  // namespace ifp

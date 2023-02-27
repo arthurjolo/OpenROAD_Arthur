@@ -143,6 +143,7 @@ class dbTechLayerMinCutRule;
 class dbGuide;
 class dbMetalWidthViaMap;
 class dbTechLayerAreaRule;
+class dbTechLayerFistLastPitch;
 class dbModule;
 class dbModInst;
 class dbGroup;
@@ -3954,6 +3955,16 @@ class dbTrackGrid : public dbObject
   void addGridPatternY(int origin_y, int line_count, int step);
 
   ///
+  /// Add a Non Uniform "X" grid pattern.
+  ///
+  void addNonUniformGridX(int origin_x, int line_count, int step, int first_last_offset, int n_rows);
+
+  ///
+  /// Add a Non Uniform "Y" grid pattern.
+  ///
+  void addNonUniformGridY(int origin_x, int line_count, int step, int first_last_offset, int n_rows);
+
+  ///
   /// Get the number of "X" grid patterns.
   ///
   int getNumGridPatternsX();
@@ -7195,8 +7206,11 @@ class dbTechLayer : public dbObject
   int getPitch();
   int getPitchX();
   int getPitchY();
+  int getFistLastPitch();
   void setPitch(int pitch);
   void setPitchXY(int pitch_x, int pitch_y);
+  void setFistLastPitch(int first_last_pitch, int pitch);
+  void setFistLastPitchXY(int first_last_pitch, int pitch_x, int pitch_y);
   bool hasXYPitch();
 
   int getOffset();
@@ -8999,6 +9013,32 @@ class dbTechLayerAreaRule : public dbObject
 
   // User Code End dbTechLayerAreaRule
 };
+
+class dbTechLayerFistLastPitch : public dbObject
+{
+  public:
+    void setFistLastPich(int first_last_pitch);
+
+    int getFirstLastPitch();
+
+    void setPitch(int pitch);
+
+    int getPitch();
+
+    void setPitchX(int pitch_x);
+
+    int getPitchX();
+
+    void setPitchY();
+
+    int getPitchY();
+
+    bool hasPitchXY();
+
+    static dbTechLayerFistLastPitch* create(dbTechLayer* _layer);
+
+    static void destroy(dbTechLayerFistLastPitch* rule);
+}
 
 class dbModule : public dbObject
 {

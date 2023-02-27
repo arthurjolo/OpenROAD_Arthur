@@ -40,6 +40,7 @@
 #include "dbTable.h"
 #include "dbTable.hpp"
 #include "dbTechLayerAreaRule.h"
+#include "dbTechLayerFistLastPitch.h"
 #include "dbTechLayerArraySpacingRule.h"
 #include "dbTechLayerCornerSpacingRule.h"
 #include "dbTechLayerCutClassRule.h"
@@ -1980,6 +1981,12 @@ int dbTechLayer::getPitchY()
   return layer->_pitch_y;
 }
 
+int dbTechLayer::getFistLastPitch()
+{
+  _dbTechLayer* layer = (_dbTechLayer*) this;
+  return layer->_first_last_pitch;
+}
+
 void dbTechLayer::setPitch(int pitch)
 {
   _dbTechLayer* layer = (_dbTechLayer*) this;
@@ -1994,6 +2001,20 @@ void dbTechLayer::setPitchXY(int pitch_x, int pitch_y)
   layer->_pitch_x = pitch_x;
   layer->_pitch_y = pitch_y;
   layer->flags_.has_xy_pitch_ = true;
+}
+
+void dbTechLayer::setFistLastPitch(int first_last_pitch, int pitch)
+{
+  _dbTechLayer* layer = (_dbTechLayer*) this;
+  layer->_first_last_pitch = first_last_pitch;
+  setPitch(pitch);
+}
+
+void dbTechLayer::setFistLastPitchXY(int first_last_pitch, int pitch_x, int pitch_y)
+{
+  _dbTechLayer* layer = (_dbTechLayer*) this;
+  layer->_first_last_pitch = first_last_pitch;
+  setPitchXY(pitch_x, pitch_y);
 }
 
 bool dbTechLayer::hasXYPitch()

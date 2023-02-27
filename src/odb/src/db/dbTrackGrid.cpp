@@ -204,10 +204,33 @@ void dbTrackGrid::addGridPatternX(int origin_x, int line_count, int step)
 
 void dbTrackGrid::addGridPatternY(int origin_y, int line_count, int step)
 {
+  
   _dbTrackGrid* grid = (_dbTrackGrid*) this;
   grid->_y_origin.push_back(origin_y);
   grid->_y_count.push_back(line_count);
   grid->_y_step.push_back(step);
+}
+
+void dbTrackGrid::addNonUniformGridX(int origin_x, int line_count, int step, int first_last_offset, int n_rows)
+{
+  _dbTrackGrid* grid = (_dbTrackGrid*) this;
+  for(int i = 0; i < n_rows; i++){
+    grid->_x_origin.push_back(origin_x + first_last_offset);
+    grid->_x_count.push_back(line_count);
+    grid->_x_step.push_back(step);
+    origin_x = 2 * first_last_offset + line_count * step;
+  }
+}
+
+void dbTrackGrid::addNonUniformGridY(int origin_y, int line_count, int step, int first_last_offset, int n_rows)
+{
+  _dbTrackGrid* grid = (_dbTrackGrid*) this;
+  for(int i = 0; i < n_rows; i++){
+    grid->_y_origin.push_back(origin_y + first_last_offset);
+    grid->_y_count.push_back(line_count);
+    grid->_y_step.push_back(step);
+    origin_y += 2 * first_last_offset + line_count * step;
+  }
 }
 
 int dbTrackGrid::getNumGridPatternsX()

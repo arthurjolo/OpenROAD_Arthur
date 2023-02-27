@@ -65,6 +65,7 @@ class _dbTechLayerEolKeepOutRule;
 class _dbTechLayerWidthTableRule;
 class _dbTechLayerMinCutRule;
 class _dbTechLayerAreaRule;
+class _dbTechLayerFistLastPitch;
 // User Code Begin Classes
 class _dbTechLayerSpacingRule;
 class _dbTechMinCutRule;
@@ -140,6 +141,7 @@ class _dbTechLayer : public _dbObject
 
   uint _pitch_x;
   uint _pitch_y;
+  uint _first_last_pitch;
   uint _offset_x;
   uint _offset_y;
   uint _width;

@@ -132,6 +132,17 @@ make_layer_tracks(odb::dbTechLayer* layer,
   get_floorplan().makeTracks(layer, x_offset, x_pitch, y_offset, y_pitch);
 }
 
+void
+make_layer_tracks_nonuniform(odb::dbTechLayer* layer,
+                  int x_offset,
+                  int x_pitch,
+                  int y_offset,
+                  int y_pitch,
+                  int firstlastpitch)
+{
+  get_floorplan().makeTracksNonUniform(layer, x_offset, x_pitch, y_offset, y_pitch, firstlastpitch);
+}
+
 } // namespace
 
 %} // inline

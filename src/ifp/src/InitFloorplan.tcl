@@ -131,7 +131,7 @@ proc initialize_floorplan { args } {
   }
 }
 
-sta::define_cmd_args "make_tracks" {[layer]\
+sta::define_cmd_args "make_tracks_nonuniform" {[layer]\
                                       [-x_pitch x_pitch]\
                                       [-y_pitch y_pitch]\
                                       [-x_offset x_offset]\
@@ -140,6 +140,63 @@ sta::define_cmd_args "make_tracks" {[layer]\
 proc make_tracks { args } {
   sta::parse_key_args "make_tracks" args \
     keys {-x_pitch -y_pitch -x_offset -y_offset} \
+    flags {}
+
+  sta::check_argc_eq0or1 "initialize_floorplan" $args
+
+  set tech [ord::get_db_tech]
+
+  if { [llength $args] == 0 } {
+      ifp::make_layer_tracks_nonuniform
+  } elseif { [llength $args] == 1 } {
+    set layer_name [lindex $args 0]
+    set layer [$tech findLayer $layer_name]
+
+    if { [info exists keys(-x_pitch)] } {
+      set x_pitch $keys(-x_pitch)
+      set x_pitch [ifp::microns_to_mfg_grid $x_pitch]
+      sta::check_positive_float "-x_pitch" $x_pitch
+    } else {
+      set x_pitch [$layer getPitchX]
+    }
+
+    if { [info exists keys(-x_offset)] } {
+      set x_offset $keys(-x_offset)
+      sta::check_positive_float "-x_offset" $x_offset
+      set x_offset [ifp::microns_to_mfg_grid $x_offset]
+    } else {
+      set x_offset [$layer getOffsetX]
+    }
+
+    if { [info exists keys(-y_pitch)] } {
+      set y_pitch $keys(-y_pitch)
+      set y_pitch [ifp::microns_to_mfg_grid $y_pitch]
+      sta::check_positive_float "-y_pitch" $y_pitch
+    } else {
+      set y_pitch [$layer getPitchY]
+    }
+
+    if { [info exists keys(-y_offset)] } {
+      set y_offset $keys(-y_offset)
+      sta::check_positive_float "-y_offset" $y_offset
+      set y_offset [ifp::microns_to_mfg_grid $y_offset]
+    } else {
+      set y_offset [$layer getOffsetY]
+    }
+    ifp::make_layer_tracks_nonuniform $layer $x_offset $x_pitch $y_offset $y_pitch
+  }
+}
+
+sta::define_cmd_args "make_tracks" {[layer]\
+                                      [-x_pitch x_pitch]\
+                                      [-y_pitch y_pitch]\
+                                      [-x_offset x_offset]\
+                                      [-y_offset y_offset]\
+                                      [-first_last_pich first_last_pich]}
+
+proc make_tracks { args } {
+  sta::parse_key_args "make_tracks" args \
+    keys {-x_pitch -y_pitch -x_offset -y_offset -first_last_pich} \
     flags {}
 
   sta::check_argc_eq0or1 "initialize_floorplan" $args
@@ -189,7 +246,15 @@ proc make_tracks { args } {
     } else {
       set y_offset [$layer getOffsetY]
     }
-    ifp::make_layer_tracks $layer $x_offset $x_pitch $y_offset $y_pitch
+
+    if { [info exists keys(-first_last_pich)] } {
+      set first_last_pich $keys(-first_last_pich)
+      set first_last_pich [ifp::microns_to_mfg_grid $first_last_pich]
+      sta::check_positive_float "-first_last_pich" $first_last_pich
+    } else {
+      set first_last_pich [$layer getFirstLastPitch]
+    }
+    ifp::make_layer_tracks $layer $x_offset $x_pitch $y_offset $y_pitch $first_last_pich
   }
 }
 
