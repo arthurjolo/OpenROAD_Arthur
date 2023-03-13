@@ -402,6 +402,7 @@ class lefiLayer
   void setPitch(double num);
   void setMask(int num);                        // 5.8
   void setPitchXY(double xdist, double ydist);  // 5.6
+  void setFirstLastPitchRule();
   void setOffset(double num);
   void setOffsetXY(double xdist, double ydist);  // 5.6
   void setWidth(double num);
@@ -531,6 +532,7 @@ class lefiLayer
   int hasMask() const;       // 5.8
   int hasPitch() const;
   int hasXYPitch() const;  // 5.6
+  int hasFirstLastPitchRule() const;
   int hasOffset() const;
   int hasXYOffset() const;  // 5.6
   int hasWidth() const;
@@ -840,6 +842,7 @@ class lefiLayer
   char* layerType_;  // 5.8 - POLYROUTING, MIMCAP, TSV, PASSIVATION, NWELL
 
   int hasPitch_;
+  int hasFirstLastPitchRule_;
   int hasMask_;  // 5.8 native
   int hasOffset_;
   int hasWidth_;

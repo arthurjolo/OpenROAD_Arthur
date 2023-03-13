@@ -1477,6 +1477,7 @@ lefiLayer::lefiLayer()
       typeSize_(0),
       layerType_(NULL),
       hasPitch_(0),
+      hasFirstLastPitchRule_(0),
       hasMask_(0),
       hasOffset_(0),
       hasWidth_(0),
@@ -1800,6 +1801,7 @@ lefiLayer::lefiLayer(const lefiLayer& prev)
       typeSize_(0),
       layerType_(NULL),
       hasPitch_(0),
+      hasFirstLastPitchRule_(0),
       hasMask_(0),
       hasOffset_(0),
       hasWidth_(0),
@@ -2033,6 +2035,7 @@ lefiLayer::lefiLayer(const lefiLayer& prev)
       layerType_, char, sizeof(char) * (strlen(prev.layerType_) + 1));
 
   LEF_COPY_FUNC(hasPitch_);
+  LEF_COPY_FUNC(hasFirstLastPitchRule_);
   LEF_COPY_FUNC(hasMask_);
   LEF_COPY_FUNC(hasOffset_);
   LEF_COPY_FUNC(hasWidth_);
@@ -2544,6 +2547,7 @@ void lefiLayer::clear()
   }
   hasMask_ = 0;
   hasPitch_ = 0;
+  hasFirstLastPitchRule_ = 0;
   hasOffset_ = 0;
   hasWidth_ = 0;
   hasArea_ = 0;
@@ -2785,6 +2789,11 @@ void lefiLayer::setPitchXY(double xdist, double ydist)
   hasPitch_ = 2;  // 2 means it has X & Y values
   pitchX_ = xdist;
   pitchY_ = ydist;
+}
+
+void lefiLayer::setFirstLastPitchRule()
+{
+  hasFirstLastPitchRule_ = 1;
 }
 
 void lefiLayer::setMask(int num)
@@ -3807,6 +3816,11 @@ int lefiLayer::hasXYPitch() const
     return 1;
   else
     return 0;
+}
+
+int lefiLayer::hasFirstLastPitchRule() const
+{
+  return hasFirstLastPitchRule_;
 }
 
 int lefiLayer::hasOffset() const

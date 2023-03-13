@@ -672,6 +672,7 @@ void lefin::layer(lefiLayer* layer)
         MinCutParser parser(l, this);
         parser.parse(layer->propValue(iii));
       } else if (!strcmp(layer->propName(iii), "LEF58_PITCH")) {
+        layer->setFirstLastPitchRule();
         lefTechLayerPitchRuleParser parser(this);
         parser.parse(layer->propValue(iii), l);
       } else if (!strcmp(layer->propName(iii), "LEF58_AREA")) {
@@ -738,7 +739,8 @@ void lefin::layer(lefiLayer* layer)
     l->setMinWidth(dbdist(layer->minwidth()));
   else if (type == dbTechLayerType::ROUTING)
     l->setMinWidth(l->getWidth());
-  if (!l->hasPitch()) {
+  // if pitch has alredy been set by LEF58_PITCH ignore PITCH
+  if (!layer->hasFirstLastPitchRule()) {
     if (layer->hasPitch())
       l->setPitch(dbdist(layer->pitch()));
     else if (layer->hasXYPitch())
