@@ -58,5 +58,6 @@ target_link_libraries(FastRoute4.1
     utl_lib
     stt_lib
     odb
+    dbSta_lib
     Boost::boost
 )

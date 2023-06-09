@@ -33,7 +33,7 @@
 //
 ///////////////////////////////////////////////////////////////////////////////
 
-#include "MakeWireParasitics.h"
+#include "grt/MakeWireParasitics.h"
 
 #include "db_sta/dbNetwork.hh"
 #include "db_sta/dbSta.hh"

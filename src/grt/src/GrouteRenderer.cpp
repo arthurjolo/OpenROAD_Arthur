@@ -6,7 +6,7 @@
 
 #include "GrouteRenderer.h"
 
-#include "Net.h"
+#include "grt/Net.h"
 
 namespace grt {
 
