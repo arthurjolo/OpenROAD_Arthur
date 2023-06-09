@@ -247,6 +247,7 @@ class GlobalRouter
   void reportNetDetailedRouteWL(odb::dbWire* wire, std::ofstream& out);
   void createWLReportFile(const char* file_name, bool verbose);
   std::vector<PinGridLocation> getPinGridPositions(odb::dbNet* db_net);
+  odb::Point findFakePinPosition(Pin& pin, odb::dbNet* db_net);
 
   bool pinAccessPointPositions(
       const Pin& pin,
@@ -330,7 +331,7 @@ class GlobalRouter
                      odb::Point& pin_position,
                      odb::dbTechLayer* layer,
                      Net* net);
-  odb::Point findFakePinPosition(Pin& pin, odb::dbNet* db_net);
+
   void initAdjustments();
   odb::Point getRectMiddle(const odb::Rect& rect);
   NetRouteMap findRouting(std::vector<Net*>& nets,
