@@ -2586,6 +2586,12 @@ void FastRouteCore::SaveLastRouteLen()
     if (nets_[netID] == nullptr) {
       continue;
     }
+    if((strcmp(nets_[netID]->getName(), "b[332]") == 0)) {
+      logger_->report("NetID: {}; node 11: ({}, {}, {})", netID,
+                      nets_[netID]->getPinX(11),
+                      nets_[netID]->getPinY(11),
+                      nets_[netID]->getPinL(11));
+    }
     auto& treeedges = sttrees_[netID].edges;
     // loop for all the tree edges
     const int num_edges = sttrees_[netID].num_edges();

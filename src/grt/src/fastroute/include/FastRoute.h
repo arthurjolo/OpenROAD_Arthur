@@ -229,6 +229,7 @@ class FastRouteCore
   double dbuToMicrons(int64_t dbu);
   odb::Rect globalRoutingToBox(const GSegment& route);
   NetRouteMap getRoutes();
+  bool isConnectingPins(const TreeEdge* edge, int net_id);
   NetRouteMap getPlanarRoutes();
 
   // maze functions

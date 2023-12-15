@@ -190,15 +190,42 @@ void FastRouteCore::fillVIA()
 
     for (int edgeID = 0; edgeID < sttrees_[netID].num_edges(); edgeID++) {
       TreeEdge* treeedge = &(treeedges[edgeID]);
+      int node1_alias = treeedge->n1a;
+      int node2_alias = treeedge->n2a;
+      if((strcmp(nets_[netID]->getName(), "b[332]") == 0)) {
+        if ((treenodes[node1_alias].x == 146 && treenodes[node1_alias].y == 29)
+            || (treenodes[node2_alias].x == 146 && treenodes[node2_alias].y == 29)) {
+          logger_->report("\tnode1: ({}, {}), aliasHID: {}, aliasLID: {}, botL: {}, topL: {}",
+                                  treenodes[node1_alias].x,
+                                  treenodes[node1_alias].y,
+                                  treenodes[node1_alias].hID,
+                                  treenodes[node1_alias].lID,
+                                  treenodes[node1_alias].botL,
+                                  treenodes[node1_alias].topL);
+          if(node1_alias < num_terminals) {
+            logger_->report("node1_alias: {}, node1: {}", node1_alias, treeedge->n1);
+            logger_->report("node1_alias layer: {}", nets_[netID]->getPinL(node1_alias));
+            logger_->report("node1 layer: {}", nets_[netID]->getPinL(treeedge->n1));
+          }
+          logger_->report("\tnode2: ({}, {}), aliasHID: {}, aliasLID: {}, botL: {}, topL: {}",
+                                  treenodes[node2_alias].x,
+                                  treenodes[node2_alias].y,
+                                  treenodes[node2_alias].hID,
+                                  treenodes[node2_alias].lID,
+                                  treenodes[node2_alias].botL,
+                                  treenodes[node2_alias].topL);
+          logger_->report("node2_alias: {}, node2: {}", node2_alias, treeedge->n2);
+          if(node2_alias < num_terminals) {
+            logger_->report("node2 layer: {}", nets_[netID]->getPinL(node2_alias));
+          }
+        }
+      }
       if (treeedge->len > 0) {
         int newCNT = 0;
         int routeLen = treeedge->route.routelen;
         const std::vector<short>& gridsX = treeedge->route.gridsX;
         const std::vector<short>& gridsY = treeedge->route.gridsY;
         const std::vector<short>& gridsL = treeedge->route.gridsL;
-
-        int node1_alias = treeedge->n1a;
-        int node2_alias = treeedge->n2a;
 
         if (node1_alias < num_terminals) {
           if (treenodes[node1_alias].hID == BIG_INT
@@ -308,6 +335,134 @@ void FastRouteCore::fillVIA()
           treeedge->route.gridsY[k] = tmpY[k];
           treeedge->route.gridsL[k] = tmpL[k];
         }
+      } else if ((treenodes[treeedge->n1].hID == BIG_INT && treenodes[treeedge->n1].lID == BIG_INT)
+              || (treenodes[treeedge->n2].hID == BIG_INT && treenodes[treeedge->n2].lID == BIG_INT)){
+        int node1 = treeedge->n1;
+        int node2 = treeedge->n2;
+        if((treenodes[node1].botL == num_layers_ && treenodes[node1].topL == -1) || (treenodes[node2].botL == num_layers_ && treenodes[node2].topL == -1)) {
+          continue;
+        }
+        int l1 = treenodes[node1].botL;
+        int l2 = treenodes[node2].botL;
+        
+        if ((strcmp(nets_[netID]->getName(), "b[332]") == 0)) {
+          logger_->report("\route len antes: {}", treeedge->route.routelen);
+          if(node1 < num_terminals) {
+            logger_->report("\tnode1 terminal");
+            logger_->report("\tnode1: ({}, {}, {}), aliasHID: {}, aliasLID: {}, botL: {}, topL: {}, aliasbotL: {}, alias topL: {}",
+                                treenodes[node1].x,
+                                treenodes[node1].y,
+                                nets_[netID]->getPinL(node1),
+                                treenodes[node1].hID,
+                                treenodes[node1].lID,
+                                treenodes[node1].botL,
+                                treenodes[node1].topL,
+                                treenodes[node1_alias].botL,
+                                treenodes[node1_alias].topL);
+          } else {
+            logger_->report("\tnode1: ({}, {}), aliasHID: {}, aliasLID: {}, botL: {}, topL: {}, aliasbotL: {}, alias topL: {}",
+                                treenodes[node1].x,
+                                treenodes[node1].y,
+                                treenodes[node1].hID,
+                                treenodes[node1].lID,
+                                treenodes[node1].botL,
+                                treenodes[node1].topL,
+                                treenodes[node1_alias].botL,
+                                treenodes[node1_alias].topL);
+          }
+          if(node2 < num_terminals) {
+            logger_->report("\tnode2 terminal");
+            logger_->report("\tnode2: ({}, {}, {}), HID: {}, LID: {}, botL: {}, topL: {}, aliasbotL: {}, alias topL: {}",
+                                treenodes[node2].x,
+                                treenodes[node2].y,
+                                nets_[netID]->getPinL(node2),
+                                treenodes[node2].hID,
+                                treenodes[node2].lID,
+                                treenodes[node2].botL,
+                                treenodes[node2].topL,
+                                treenodes[node2_alias].botL,
+                                treenodes[node2_alias].topL);
+          } else {
+            logger_->report("\tnode2: ({}, {}), HID: {}, LID: {}, botL: {}, topL: {}, aliasbotL: {}, alias topL: {}",
+                                treenodes[node2].x,
+                                treenodes[node2].y,
+                                treenodes[node2].hID,
+                                treenodes[node2].lID,
+                                treenodes[node2].botL,
+                                treenodes[node2].topL,
+                                treenodes[node2_alias].botL,
+                                treenodes[node2_alias].topL);
+          }
+          logger_->report("\t aliasHID: {}, aliasLID: {}", treenodes[node2_alias].hID,
+                                treenodes[node2_alias].lID);
+        }
+        /*just to enshure, if any of the nodes is a terminal get the correct bottom
+        if(node1 < num_terminals) {
+          l1 = std::min(nets_[netID]->getPinL(node1), l1);
+        }
+
+        if(node2 < num_terminals) {
+          l2 = std::min(nets_[netID]->getPinL(node2), l2);
+        }*/
+        auto [bottom_layer, top_layer] = std::minmax(l1, l2);
+        treeedge->route.gridsX.resize(top_layer - bottom_layer + 1, 0);
+        treeedge->route.gridsY.resize(top_layer - bottom_layer + 1, 0);
+        treeedge->route.gridsL.resize(top_layer - bottom_layer + 1, 0);
+        treeedge->route.type = RouteType::MazeRoute;
+        treeedge->route.routelen = top_layer - bottom_layer;
+        int count = 0;
+        for (int l = bottom_layer; l <= top_layer; l++) {
+          treeedge->route.gridsX[count] = treenodes[node1].x;
+          treeedge->route.gridsY[count] = treenodes[node1].y;
+          treeedge->route.gridsL[count] = l;
+          count ++;
+          /*if (strcmp(nets_[netID]->getName(), "a[720]") == 0)
+            logger_->report("\tadded: ({}, {}, {})", treenodes[node1].x,
+                                                    treenodes[node1].y,
+                                                    l);*/
+
+        }
+
+        /*if (strcmp(nets_[netID]->getName(), "a[720]") == 0) {
+          for(int i = 0; i < treeedge->route.gridsX.size(); i++) {
+            logger_->report("\treadded: ({}, {}, {})", treeedge->route.gridsX[i],
+                                                    treeedge->route.gridsY[i],
+                                                    treeedge->route.gridsL[i]);
+          }
+          //logger_->report("\route len depois: {}", treeedge->route.routelen);
+        }*/
+      } else if (strcmp(nets_[netID]->getName(), "b[332]") == 0){
+        int node1 = treeedge->n1;
+        int node2 = treeedge->n2;
+        logger_->report("\route len antes: {}", treeedge->route.routelen);
+        if(node1 < num_terminals)
+          logger_->report("\tnode1 terminal");
+        logger_->report("\tnode1: ({}, {}, {}), aliasHID: {}, aliasLID: {}, botL: {}, topL: {}, aliasbotL: {}, alias topL: {}",
+                              treenodes[node1].x,
+                              treenodes[node1].y,
+                              nets_[netID]->getPinL(node1),
+                              treenodes[node1].hID,
+                              treenodes[node1].lID,
+                              treenodes[node1].botL,
+                              treenodes[node1].topL,
+                              treenodes[node1_alias].botL,
+                              treenodes[node1_alias].topL);
+        logger_->report("\t aliasHID: {}, aliasLID: {}", treenodes[node1_alias].hID,
+                              treenodes[node1_alias].lID);
+        if(node2 < num_terminals)
+          logger_->report("\tnode2 terminal");
+        logger_->report("\tnode2: ({}, {}, {}), HID: {}, LID: {}, botL: {}, topL: {}, aliasbotL: {}, alias topL: {}",
+                              treenodes[node2].x,
+                              treenodes[node2].y,
+                              nets_[netID]->getPinL(node2),
+                              treenodes[node2].hID,
+                              treenodes[node2].lID,
+                              treenodes[node2].botL,
+                              treenodes[node2].topL,
+                              treenodes[node2_alias].botL,
+                              treenodes[node2_alias].topL);
+        logger_->report("\t aliasHID: {}, aliasLID: {}", treenodes[node2_alias].hID,
+                              treenodes[node2_alias].lID);
       }
     }
   }
@@ -1661,9 +1816,9 @@ void FastRouteCore::printTree2D(int netID)
                     sttrees_[netID].nodes[nodeID].x);
   }
 
-  for (int edgeID = 0; edgeID < sttrees_[netID].num_edges(); edgeID++) {
+  /*for (int edgeID = 0; edgeID < sttrees_[netID].num_edges(); edgeID++) {
     printEdge2D(netID, edgeID);
-  }
+  }*/
 }
 
 bool FastRouteCore::skipNet(int netID)
