@@ -1810,10 +1810,12 @@ void FastRouteCore::printEdge2D(int netID, int edgeID)
 void FastRouteCore::printTree2D(int netID)
 {
   for (int nodeID = 0; nodeID < sttrees_[netID].num_nodes; nodeID++) {
-    logger_->report("nodeID {},  [{}, {}]",
+    logger_->report("nodeID {},  [{}, {}, {}]",
                     nodeID,
+                    sttrees_[netID].nodes[nodeID].x,
                     sttrees_[netID].nodes[nodeID].y,
-                    sttrees_[netID].nodes[nodeID].x);
+                    sttrees_[netID].nodes[nodeID].l
+                    );
   }
 
   /*for (int edgeID = 0; edgeID < sttrees_[netID].num_edges(); edgeID++) {

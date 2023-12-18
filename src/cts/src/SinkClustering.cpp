@@ -487,6 +487,7 @@ double SinkClustering::getWireLength(const vector<Point<double>>& points) const
 {
   vector<int> vecX;
   vector<int> vecY;
+  vector<int> vecL;
   double driverX = 0;
   double driverY = 0;
   for (const auto& point : points) {
@@ -497,13 +498,15 @@ double SinkClustering::getWireLength(const vector<Point<double>>& points) const
   driverY /= points.size();
   vecX.emplace_back(driverX * options_->getDbUnits());
   vecY.emplace_back(driverY * options_->getDbUnits());
+  vecL.emplace_back(0);
 
   for (const auto& point : points) {
     vecX.emplace_back(point.getX() * options_->getDbUnits());
     vecY.emplace_back(point.getY() * options_->getDbUnits());
+    vecL.emplace_back(0);
   }
   stt::SteinerTreeBuilder* sttBuilder = options_->getSttBuilder();
-  const stt::Tree pdTree = sttBuilder->makeSteinerTree(vecX, vecY, 0);
+  const stt::Tree pdTree = sttBuilder->makeSteinerTree(vecX, vecY, vecL, 0);
   const int wl = pdTree.length;
   return wl / double(options_->getDbUnits());
 }

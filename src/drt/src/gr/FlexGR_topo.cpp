@@ -45,15 +45,17 @@ void FlexGR::genSTTopology_FLUTE(vector<frNode*>& pinGCellNodes,
   int degree = pinGCellNodes.size();
   std::vector<int> xs(degree);
   std::vector<int> ys(degree);
+  std::vector<int> ls(degree);
   for (int i = 0; i < (int) pinGCellNodes.size(); i++) {
     auto gcellNode = pinGCellNodes[i];
     Point loc = gcellNode->getLoc();
     xs[i] = loc.x();
     ys[i] = loc.y();
+    ls[i] = 0;
   }
   // temporary to keep using flute here
   stt_builder_->setAlpha(0);
-  auto fluteTree = stt_builder_->makeSteinerTree(xs, ys, 0);
+  auto fluteTree = stt_builder_->makeSteinerTree(xs, ys, ls,0);
 
   map<Point, frNode*> pinGCell2Nodes, steinerGCell2Nodes;
   map<frNode*, set<frNode*, frBlockObjectComp>, frBlockObjectComp>

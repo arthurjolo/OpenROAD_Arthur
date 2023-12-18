@@ -90,7 +90,7 @@ NUMSOLN_TYPE numsoln;
 
 struct point
 {
-  int x, y;
+  int x, y, l;
   int o;
 };
 
@@ -1024,9 +1024,9 @@ static bool ordery(const point* a, const point* b)
   return a->y < b->y;
 }
 
-Tree flute(const std::vector<int>& x, const std::vector<int>& y, int acc)
+Tree flute(const std::vector<int>& x, const std::vector<int>& y, const std::vector<int>& l, int acc)
 {
-  std::vector<int> xs, ys;
+  std::vector<int> xs, ys, ls;
   int minval;
   std::vector<int> s;
   int i, j, minidx;
@@ -1047,15 +1047,18 @@ Tree flute(const std::vector<int>& x, const std::vector<int>& y, int acc)
     t.branch.resize(2);
     t.branch[0].x = x[0];
     t.branch[0].y = y[0];
+    t.branch[0].l = l[0];
     t.branch[0].n = 1;
     t.branch[1].x = x[1];
     t.branch[1].y = y[1];
+    t.branch[1].l = l[1];
     t.branch[1].n = 1;
   } else {
     ensureLUT(d);
 
     xs.resize(d);
     ys.resize(d);
+    ls.resize(d);
     s.resize(d);
     pt = (struct point*) malloc(sizeof(struct point) * (d + 1));
     std::vector<point*> ptp(d + 1);
@@ -1063,6 +1066,7 @@ Tree flute(const std::vector<int>& x, const std::vector<int>& y, int acc)
     for (i = 0; i < d; i++) {
       pt[i].x = x[i];
       pt[i].y = y[i];
+      pt[i].l = l[i];
       ptp[i] = &pt[i];
     }
 
@@ -1101,6 +1105,7 @@ Tree flute(const std::vector<int>& x, const std::vector<int>& y, int acc)
 
     for (i = 0; i < d; i++) {
       xs[i] = ptp[i]->x;
+      ls[i] = ptp[i]->l;
       ptp[i]->o = i;
     }
 
@@ -1129,7 +1134,7 @@ Tree flute(const std::vector<int>& x, const std::vector<int>& y, int acc)
       }
     }
 
-    t = flutes(xs, ys, s, acc);
+    t = flutes(xs, ys, ls, s, acc);
 
     free(pt);
   }
@@ -1147,6 +1152,7 @@ Tree flute(const std::vector<int>& x, const std::vector<int>& y, int acc)
 Tree flutes_RDP(int d,
                 std::vector<int> xs,
                 std::vector<int> ys,
+                std::vector<int> ls,
                 std::vector<int> s,
                 int acc)
 {
@@ -1168,6 +1174,7 @@ Tree flutes_RDP(int d,
       }
       for (j = ss + 1; j < d; j++) {
         xs[j - 1] = xs[j];
+        ls[j - 1] = ls[j];
       }
       for (j = 0; j <= d - 2; j++) {
         if (s[j] > ss) {
@@ -1178,13 +1185,14 @@ Tree flutes_RDP(int d,
       d--;
     }
   }
-  return flutes_ALLD(d, xs, ys, s, acc);
+  return flutes_ALLD(d, xs, ys, ls, s, acc);
 }
 
 // For low-degree, i.e., 2 <= d <= FLUTE_D
 Tree flutes_LD(int d,
                const std::vector<int>& xs,
                const std::vector<int>& ys,
+               const std::vector<int>& ls,
                const std::vector<int>& s)
 {
   int k, pi, i, j;
@@ -1342,6 +1350,7 @@ Tree flutes_LD(int d,
 Tree flutes_MD(int d,
                const std::vector<int>& xs,
                const std::vector<int>& ys,
+               const std::vector<int>& ls,
                const std::vector<int>& s,
                int acc)
 {
@@ -1356,7 +1365,7 @@ Tree flutes_MD(int d,
   int ll, minl, coord1, coord2;
   std::vector<int> distx, disty;
   int xydiff;
-  std::vector<int> x1, x2, y1, y2;
+  std::vector<int> x1, x2, y1, y2, l1, l2;
 
   degree = d + 1;
   score = (float*) malloc(sizeof(float) * (2 * degree));
@@ -1366,6 +1375,8 @@ Tree flutes_MD(int d,
   x2.resize(degree);
   y1.resize(degree);
   y2.resize(degree);
+  l1.resize(degree);
+  l2.resize(degree);
   distx.resize(degree);
   disty.resize(degree);
   si.resize(degree);
@@ -1381,10 +1392,12 @@ Tree flutes_MD(int d,
       for (i = 0; i <= ms; i++) {
         x1[i] = xs[i];
         y1[i] = ys[i];
+        l1[i] = ls[i];
         s1[i] = s[i];
       }
       x1[ms + 1] = xs[ms];
       y1[ms + 1] = ys[ms];
+      l1[ms + 1] = ls[ms];
       s1[ms + 1] = ms + 1;
 
       s2[0] = 0;
@@ -1392,11 +1405,12 @@ Tree flutes_MD(int d,
         s2[i] = s[i + ms] - ms;
       }
 
-      t1 = flutes_LMD(ms + 2, x1, y1, s1, acc);
+      t1 = flutes_LMD(ms + 2, x1, y1, l1, s1, acc); //add l1
 
       std::vector<int> tmp_xs(xs.begin() + ms, xs.end());
       std::vector<int> tmp_ys(ys.begin() + ms, ys.end());
-      t2 = flutes_LMD(d - ms, tmp_xs, tmp_ys, s2, acc);
+      std::vector<int> tmp_ls(ls.begin() + ms, ls.end());
+      t2 = flutes_LMD(d - ms, tmp_xs, tmp_ys, tmp_ls, s2, acc); //ad temp_ls
       t = dmergetree(t1, t2);
 
       free(score);
@@ -1411,14 +1425,17 @@ Tree flutes_MD(int d,
     }
     if (ms >= 2) {
       x1[0] = xs[ms];
+      l1[0] = ls[ms];
       y1[0] = ys[0];
       s1[0] = s[0] - ms + 1;
       for (i = 1; i <= d - 1 - ms; i++) {
         x1[i] = xs[i + ms - 1];
+        l1[i] = ls[i + ms - 1];
         y1[i] = ys[i];
         s1[i] = s[i] - ms + 1;
       }
       x1[d - ms] = xs[d - 1];
+      l1[d - ms] = ls[d - 1];
       y1[d - ms] = ys[d - 1 - ms];
       s1[d - ms] = 0;
 
@@ -1427,10 +1444,10 @@ Tree flutes_MD(int d,
         s2[i] = s[i + d - 1 - ms];
       }
 
-      t1 = flutes_LMD(d + 1 - ms, x1, y1, s1, acc);
+      t1 = flutes_LMD(d + 1 - ms, x1, y1, l1, s1, acc); //add l1
 
       std::vector<int> tmp_ys(ys.begin() + d - 1 - ms, ys.end());
-      t2 = flutes_LMD(ms + 1, xs, tmp_ys, s2, acc);
+      t2 = flutes_LMD(ms + 1, xs, tmp_ys, ls, s2, acc); //add ls
       t = dmergetree(t1, t2);
 
       free(score);
@@ -1602,10 +1619,11 @@ Tree flutes_MD(int d,
         }
       }
 
-      t1 = flutes_LMD(p + 1, xs, y1, s1, newacc);
+      t1 = flutes_LMD(p + 1, xs, y1, ls, s1, newacc); //add ls
 
       std::vector<int> tmp_xs(xs.begin() + p, xs.end());
-      t2 = flutes_LMD(d - p, tmp_xs, y2, s2, newacc);
+      std::vector<int> tmp_ls(ls.begin() + p, ls.end());
+      t2 = flutes_LMD(d - p, tmp_xs, y2, tmp_ls, s2, newacc); //add temp_ls
       ll = t1.length + t2.length;
       coord1 = t1.branch[t1.branch[nn1].n].y;
       coord2 = t2.branch[t2.branch[nn2].n].y;
@@ -1620,24 +1638,27 @@ Tree flutes_MD(int d,
         if (si[r] < p) {
           s1[si[r]] = n1;
           x1[n1] = xs[r];
+          l1[n1] = ls[r];
           n1++;
         } else if (si[r] > p) {
           s2[si[r] - p] = n2;
           x2[n2] = xs[r];
+          l2[n2] = ls[r];
           n2++;
         } else {  // if (si[r] == p)  i.e.,  r = s[p]
           s1[p] = n1;
           s2[0] = n2;
           x1[n1] = x2[n2] = xs[r];
+          l1[n1] = l2[n2] = ls[r];
           n1++;
           n2++;
         }
       }
 
-      t1 = flutes_LMD(p + 1, x1, ys, s1, newacc);
+      t1 = flutes_LMD(p + 1, x1, ys, l1, s1, newacc); //add l1
 
       std::vector<int> tmp_ys(ys.begin() + p, ys.end());
-      t2 = flutes_LMD(d - p, x2, tmp_ys, s2, newacc);
+      t2 = flutes_LMD(d - p, x2, tmp_ys, l2, s2, newacc); //add l2
       ll = t1.length + t2.length;
       coord1 = t1.branch[t1.branch[p].n].x;
       coord2 = t2.branch[t2.branch[0].n].x;
@@ -1691,21 +1712,25 @@ Tree dmergetree(Tree t1, Tree t2)
   for (i = 0; i <= t1.deg - 2; i++) {
     t.branch[i].x = t1.branch[i].x;
     t.branch[i].y = t1.branch[i].y;
+    t.branch[i].l = t1.branch[i].l;
     t.branch[i].n = t1.branch[i].n + offset1;
   }
   for (i = t1.deg - 1; i <= d - 1; i++) {
     t.branch[i].x = t2.branch[i - t1.deg + 2].x;
     t.branch[i].y = t2.branch[i - t1.deg + 2].y;
+    t.branch[i].l = t2.branch[i - t1.deg + 2].l;
     t.branch[i].n = t2.branch[i - t1.deg + 2].n + offset2;
   }
   for (i = d; i <= d + t1.deg - 3; i++) {
     t.branch[i].x = t1.branch[i - offset1].x;
     t.branch[i].y = t1.branch[i - offset1].y;
+    t.branch[i].l = t1.branch[i - offset1].l;
     t.branch[i].n = t1.branch[i - offset1].n + offset1;
   }
   for (i = d + t1.deg - 2; i <= 2 * d - 3; i++) {
     t.branch[i].x = t2.branch[i - offset2].x;
     t.branch[i].y = t2.branch[i - offset2].y;
+    t.branch[i].l = t2.branch[i - offset2].l;
     t.branch[i].n = t2.branch[i - offset2].n + offset2;
   }
 
@@ -1746,16 +1771,19 @@ Tree hmergetree(Tree t1, Tree t2, const std::vector<int>& s)
     if (s[i] < p) {
       t.branch[i].x = t1.branch[n1].x;
       t.branch[i].y = t1.branch[n1].y;
+      t.branch[i].l = t1.branch[n1].l;
       t.branch[i].n = t1.branch[n1].n + offset1;
       n1++;
     } else if (s[i] > p) {
       t.branch[i].x = t2.branch[n2].x;
       t.branch[i].y = t2.branch[n2].y;
+      t.branch[i].l = t1.branch[n2].l;
       t.branch[i].n = t2.branch[n2].n + offset2;
       n2++;
     } else {
       t.branch[i].x = t2.branch[n2].x;
       t.branch[i].y = t2.branch[n2].y;
+      t.branch[i].l = t1.branch[n2].l;
       t.branch[i].n = t2.branch[n2].n + offset2;
       nn1 = n1;
       nn2 = n2;
@@ -1767,11 +1795,13 @@ Tree hmergetree(Tree t1, Tree t2, const std::vector<int>& s)
   for (i = t.deg; i <= t.deg + t1.deg - 3; i++) {
     t.branch[i].x = t1.branch[i - offset1].x;
     t.branch[i].y = t1.branch[i - offset1].y;
+    t.branch[i].l = t1.branch[i - offset1].l;
     t.branch[i].n = t1.branch[i - offset1].n + offset1;
   }
   for (i = t.deg + t1.deg - 2; i <= 2 * t.deg - 4; i++) {
     t.branch[i].x = t2.branch[i - offset2].x;
     t.branch[i].y = t2.branch[i - offset2].y;
+    t.branch[i].l = t2.branch[i - offset2].l;
     t.branch[i].n = t2.branch[i - offset2].n + offset2;
   }
   extra = 2 * t.deg - 3;
@@ -1787,6 +1817,7 @@ Tree hmergetree(Tree t1, Tree t2, const std::vector<int>& s)
     t.branch[extra].y = t2.branch[nn2].y;
   }
   t.branch[extra].x = t2.branch[nn2].x;
+  t.branch[extra].l = t2.branch[nn2].l;
   t.branch[extra].n = t.branch[ii].n;
   t.branch[ii].n = extra;
 
@@ -1807,7 +1838,7 @@ Tree hmergetree(Tree t1, Tree t2, const std::vector<int>& s)
 Tree vmergetree(Tree t1, Tree t2)
 {
   int i, prev, curr, next, extra, offset1, offset2;
-  int coord1, coord2;
+  int coord1, coord2, coord1_l, coord2_l;
   Tree t;
 
   t.deg = t1.deg + t2.deg - 1;
@@ -1819,34 +1850,43 @@ Tree vmergetree(Tree t1, Tree t2)
   for (i = 0; i <= t1.deg - 2; i++) {
     t.branch[i].x = t1.branch[i].x;
     t.branch[i].y = t1.branch[i].y;
+    t.branch[i].l = t1.branch[i].l;
     t.branch[i].n = t1.branch[i].n + offset1;
   }
   for (i = t1.deg - 1; i <= t.deg - 1; i++) {
     t.branch[i].x = t2.branch[i - t1.deg + 1].x;
     t.branch[i].y = t2.branch[i - t1.deg + 1].y;
+    t.branch[i].l = t2.branch[i - t1.deg + 1].l;
     t.branch[i].n = t2.branch[i - t1.deg + 1].n + offset2;
   }
   for (i = t.deg; i <= t.deg + t1.deg - 3; i++) {
     t.branch[i].x = t1.branch[i - offset1].x;
     t.branch[i].y = t1.branch[i - offset1].y;
+    t.branch[i].l = t1.branch[i - offset1].l;
     t.branch[i].n = t1.branch[i - offset1].n + offset1;
   }
   for (i = t.deg + t1.deg - 2; i <= 2 * t.deg - 4; i++) {
     t.branch[i].x = t2.branch[i - offset2].x;
     t.branch[i].y = t2.branch[i - offset2].y;
+    t.branch[i].l = t2.branch[i - offset2].l;
     t.branch[i].n = t2.branch[i - offset2].n + offset2;
   }
   extra = 2 * t.deg - 3;
   coord1 = t1.branch[t1.branch[t1.deg - 1].n].x;
   coord2 = t2.branch[t2.branch[0].n].x;
+  coord1_l = t1.branch[t1.branch[t1.deg - 1].n].x;
+  coord2_l = t2.branch[t2.branch[0].n].x;
   if (t2.branch[0].x > std::max(coord1, coord2)) {
     t.branch[extra].x = std::max(coord1, coord2);
+    t.branch[extra].l = std::max(coord1_l, coord2_l);
     t.length -= t2.branch[0].x - t.branch[extra].x;
   } else if (t2.branch[0].x < std::min(coord1, coord2)) {
     t.branch[extra].x = std::min(coord1, coord2);
+    t.branch[extra].l = std::min(coord1_l, coord2_l);
     t.length -= t.branch[extra].x - t2.branch[0].x;
   } else {
     t.branch[extra].x = t2.branch[0].x;
+    t.branch[extra].l = t2.branch[0].l;
   }
   t.branch[extra].y = t2.branch[0].y;
   t.branch[extra].n = t.branch[t1.deg - 1].n;
@@ -1871,7 +1911,7 @@ void local_refinement(int deg, Tree* tp, int p)
   int d, dd, i, ii, j, prev, curr, next, root;
   std::vector<int> SteinerPin, index, ss;
   int degree;
-  std::vector<int> x, xs, ys;
+  std::vector<int> x, xs, ys, l, ls;
   Tree tt;
 
   degree = deg + 1;
@@ -1879,6 +1919,8 @@ void local_refinement(int deg, Tree* tp, int p)
   index.resize(2 * degree);
   x.resize(degree);
   xs.resize(degree);
+  l.resize(degree);
+  ls.resize(degree);
   ys.resize(degree);
   ss.resize(degree);
 
@@ -1923,6 +1965,7 @@ void local_refinement(int deg, Tree* tp, int p)
     }
     if (curr == root) {
       x[dd] = tp->branch[i].x;
+      l[dd] = tp->branch[i].l;
       if (SteinerPin[tp->branch[i].n] == i && tp->branch[i].n != root) {
         index[dd++] = tp->branch[i].n;  // Steiner node
       } else {
@@ -1957,10 +2000,11 @@ void local_refinement(int deg, Tree* tp, int p)
         }
       }
       xs[ss[ii]] = x[ii];
+      ls[ss[ii]] = l[ii];
       ys[ii] = tp->branch[index[ii]].y;
     }
 
-    tt = flutes_LD(dd, xs, ys, ss);
+    tt = flutes_LD(dd, xs, ys, ls, ss);
 
     // Find new wirelength
     tp->length += tt.length;
@@ -1978,6 +2022,7 @@ void local_refinement(int deg, Tree* tp, int p)
     for (; ii <= 2 * dd - 3; ii++) {
       tp->branch[index[ii]].x = tt.branch[ii].x;
       tp->branch[index[ii]].y = tt.branch[ii].y;
+      tp->branch[index[ii]].l = tt.branch[ii].l;
       tp->branch[index[ii]].n = index[tt.branch[ii].n];
     }
   }

@@ -43,6 +43,7 @@ namespace pdr {
 
 stt::Tree primDijkstra(const std::vector<int>& x,
                        const std::vector<int>& y,
+                       const std::vector<int>& l,
                        int driver_index,
                        float alpha,
                        utl::Logger* logger);

@@ -61,7 +61,7 @@ using utl::Logger;
 
 struct Branch
 {
-  int x, y;  // starting point of the branch
+  int x, y, l;  // starting point of the branch
   int n;     // index of neighbor
 };
 
@@ -83,21 +83,26 @@ class SteinerTreeBuilder
 
   void init(odb::dbDatabase* db, Logger* logger);
 
-  Tree makeSteinerTree(const std::vector<int>& x,
+  Tree makeSteinerTree(odb::dbNet* net,
+                       const std::vector<int>& x,
                        const std::vector<int>& y,
+                       const std::vector<int>& l,
                        int drvr_index,
                        float alpha);
   Tree makeSteinerTree(const std::vector<int>& x,
                        const std::vector<int>& y,
+                       const std::vector<int>& l,
                        int drvr_index);
   Tree makeSteinerTree(odb::dbNet* net,
                        const std::vector<int>& x,
                        const std::vector<int>& y,
+                       const std::vector<int>& l,
                        int drvr_index);
   // API only for FastRoute, that requires the use of flutes in its
   // internal flute implementation
   Tree makeSteinerTree(const std::vector<int>& x,
                        const std::vector<int>& y,
+                       const std::vector<int>& l,
                        const std::vector<int>& s,
                        int acc);
   bool checkTree(const Tree& tree) const;

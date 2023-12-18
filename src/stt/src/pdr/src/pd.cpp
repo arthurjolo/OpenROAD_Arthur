@@ -49,6 +49,8 @@ using std::vector;
 using stt::Tree;
 using utl::Logger;
 
+typedef std::pair<Point, int> route_pt;
+
 /////////// Nearest Neighbors
 
 // This is the method in "Prim-Dijkstra Revisited" section 4.
@@ -61,7 +63,7 @@ using utl::Logger;
 // alpha values.
 
 using Neighbors = std::vector<int>;
-static vector<Neighbors> get_nearest_neighbors(const vector<Point>& pts)
+static vector<Neighbors> get_nearest_neighbors(const vector<route_pt>& pts)
 {
   const int pt_count = pts.size();
 
@@ -81,18 +83,18 @@ static vector<Neighbors> get_nearest_neighbors(const vector<Point>& pts)
   vector<int> sorted(pt_count);
   std::iota(sorted.begin(), sorted.end(), 0);
   stable_sort(sorted.begin(), sorted.end(), [=](int i, int j) {
-    return std::make_pair(pts[i].getY(), pts[i].getX())
-           < std::make_pair(pts[j].getY(), pts[j].getX());
+    return std::make_pair(pts[i].first.getY(), pts[i].first.getX())
+           < std::make_pair(pts[j].first.getY(), pts[j].first.getX());
   });
 
   // Compute neighbors going from bottom to top in Y
   for (int idx = 0; idx < pt_count; ++idx) {
     const int pt_idx = sorted[idx];
-    const int pt_x = pts[pt_idx].getX();
+    const int pt_x = pts[pt_idx].first.getX();
     // Update upper neighbors of all pts below pt (below.y <= pt.y)
     for (int i = 0; i < idx; ++i) {
       const int below_idx = sorted[i];
-      const int below_x = pts[below_idx].getX();
+      const int below_x = pts[below_idx].first.getX();
       if (below_x <= pt_x && pt_x < ur[below_idx]) {  // pt in ur
         neighbors[below_idx].push_back(pt_idx);
         ur[below_idx] = pt_x;
@@ -105,7 +107,7 @@ static vector<Neighbors> get_nearest_neighbors(const vector<Point>& pts)
     // Set all lower neighbors for 'pt' (below.y <= pt.y)
     for (int i = idx - 1; i >= 0; --i) {
       const int below_idx = sorted[i];
-      const int below_x = pts[below_idx].getX();
+      const int below_x = pts[below_idx].first.getX();
       if (pt_x <= below_x && below_x < lr[pt_idx]) {  // below in lr
         neighbors[pt_idx].push_back(below_idx);
         lr[pt_idx] = below_x;
@@ -142,7 +144,7 @@ struct CmpEdge
   }
 };
 
-static void buildSpanningTree(const ListGraph::NodeMap<Point>& node_point,
+static void buildSpanningTree(const ListGraph::NodeMap<route_pt>& node_point,
                               const ListGraph::Node& driver_node,
                               const float alpha,
                               const vector<Neighbors>& nn,
@@ -186,7 +188,7 @@ static void buildSpanningTree(const ListGraph::NodeMap<Point>& node_point,
       }
 
       const int edge_length = Point::manhattanDistance(
-          node_point[neighbor_node], node_point[edge.node]);
+          {node_point[neighbor_node].first.getX(), node_point[neighbor_node].first.getY()}, {node_point[edge.node].first.getX(), node_point[edge.node].first.getY()});
       const int neighbor_path_length = edge_length + edge.path_length;
       const float neighbor_weight = edge_length + alpha * edge.path_length;
 
@@ -234,9 +236,9 @@ struct CmpCandidate
 static CandidateSteiner best_steiner_for_node(
     const ListGraph& graph,
     const ListGraph::Node& node,
-    const ListGraph::NodeMap<Point>& node_point)
+    const ListGraph::NodeMap<route_pt>& node_point)
 {
-  const Point pt_node = node_point[node];
+  const Point pt_node = {node_point[node].first.getX(), node_point[node].first.getY()};
 
   CandidateSteiner best;
   best.gain = 0;
@@ -244,11 +246,11 @@ static CandidateSteiner best_steiner_for_node(
   // Loop through all edge pairs.  N^2 but N is small.
   for (ListGraph::IncEdgeIt edge1(graph, node); edge1 != INVALID; ++edge1) {
     auto n1 = graph.runningNode(edge1);
-    const Point pt1 = node_point[n1];
+    const Point pt1 = {node_point[n1].first.getX(), node_point[n1].first.getY()};
     ListGraph::IncEdgeIt edge2(edge1);
     for (++edge2; edge2 != INVALID; ++edge2) {
       auto n2 = graph.runningNode(edge2);
-      const Point pt2 = node_point[n2];
+      const Point pt2 = {node_point[n2].first.getX(), node_point[n2].first.getY()};
 
       Point pt_steiner = pt_node;
       if (std::min(pt1.getX(), pt2.getX()) > pt_node.getX()) {
@@ -281,7 +283,7 @@ static CandidateSteiner best_steiner_for_node(
 // no further improvement can be found.  This idea comes from footnote
 // 1 in "Prim-Dijkstra tradeoffs for improved performance-driven
 // routing tree design".
-static void steinerize(ListGraph& graph, ListGraph::NodeMap<Point>& node_point)
+static void steinerize(ListGraph& graph, ListGraph::NodeMap<route_pt>& node_point)
 {
   using Heap = boost::heap::d_ary_heap<CandidateSteiner,
                                        boost::heap::arity<2>,
@@ -308,13 +310,13 @@ static void steinerize(ListGraph& graph, ListGraph::NodeMap<Point>& node_point)
 
     bool new_node = false;
     ListGraph::Node steiner_node;
-    if (best.steiner_point == node_point[opp1]) {
+    if (best.steiner_point == Point(node_point[opp1].first.getX(), node_point[opp1].first.getY())) {
       steiner_node = opp1;
-    } else if (best.steiner_point == node_point[opp2]) {
+    } else if (best.steiner_point == Point(node_point[opp2].first.getX(), node_point[opp2].first.getY())) {
       steiner_node = opp2;
     } else {
       steiner_node = graph.addNode();
-      node_point[steiner_node] = best.steiner_point;
+      node_point[steiner_node] = {best.steiner_point, -1};
       new_node = true;
     }
 
@@ -359,7 +361,7 @@ static void steinerize(ListGraph& graph, ListGraph::NodeMap<Point>& node_point)
 // into two nodes with a zero length edge between them.  A very high
 // degree node could be split more than once.
 static void splitDegree4Nodes(ListGraph& graph,
-                              ListGraph::NodeMap<Point>& node_point)
+                              ListGraph::NodeMap<route_pt>& node_point)
 {
   std::deque<ListGraph::Node> to_process;
   for (ListGraph::NodeIt node(graph); node != INVALID; ++node) {
@@ -403,17 +405,18 @@ static void splitDegree4Nodes(ListGraph& graph,
 static void makeTreeRecursive(const ListGraph& graph,
                               const ListGraph::Node& node,
                               const ListGraph::Node& parent,
-                              const ListGraph::NodeMap<Point>& node_point,
+                              const ListGraph::NodeMap<route_pt>& node_point,
                               Tree& tree)
 {
   const int parent_id = ListGraph::id(parent);
-  const int parent_x = node_point[parent].getX();
-  const int parent_y = node_point[parent].getY();
+  const int parent_x = node_point[parent].first.getX();
+  const int parent_y = node_point[parent].first.getY();
 
   const int n = ListGraph::id(node);
-  const int x = node_point[node].getX();
-  const int y = node_point[node].getY();
-  tree.branch[n] = {x, y, parent_id};
+  const int x = node_point[node].first.getX();
+  const int y = node_point[node].first.getY();
+  const int l = node_point[node].second;
+  tree.branch[n] = {x, y, l, parent_id};
   tree.length += std::abs(x - parent_x) + std::abs(y - parent_y);
 
   for (ListGraph::IncEdgeIt edge(graph, node); edge != INVALID; ++edge) {
@@ -427,7 +430,7 @@ static void makeTreeRecursive(const ListGraph& graph,
 static Tree makeTree(ListGraph& graph,
                      const int num_terminals,
                      const ListGraph::Node& driver_node,
-                     ListGraph::NodeMap<Point>& node_point)
+                     ListGraph::NodeMap<route_pt>& node_point)
 {
   Tree tree;
   tree.deg = num_terminals;
@@ -444,18 +447,19 @@ static Tree makeTree(ListGraph& graph,
 
 Tree primDijkstra(const vector<int>& x,
                   const vector<int>& y,
+                  const vector<int>& l,
                   const int driver_index,
                   const float alpha,
                   Logger* logger)
 {
   ListGraph graph;
-  ListGraph::NodeMap<Point> node_point(graph);  // Node -> location
+  ListGraph::NodeMap<route_pt> node_point(graph);  // Node -> location
 
   // convert x/y to points
   const int num_terminals = x.size();
-  vector<Point> pts(num_terminals);
+  vector<route_pt> pts(num_terminals);
   for (int i = 0; i < num_terminals; ++i) {
-    pts[i] = {x[i], y[i]};
+    pts[i] = {{x[i], y[i]}, l[i]};
     node_point[graph.addNode()] = pts[i];
   }
 

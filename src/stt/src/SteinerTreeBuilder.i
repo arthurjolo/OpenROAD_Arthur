@@ -48,6 +48,7 @@ namespace ord {
 // Defined in OpenRoad.i
 stt::SteinerTreeBuilder* getSteinerTreeBuilder();
 utl::Logger* getLogger();
+OpenRoad *getOpenRoad();
 }  // namespace ord
 
 using ord::getSteinerTreeBuilder;
@@ -91,46 +92,53 @@ set_min_hpwl_alpha(int hpwl, float alpha)
 
 void report_flute_tree(std::vector<int> x,
                        std::vector<int> y,
+                       std::vector<int> l,
                        int drvr_index)
 {
   const int flute_accuracy = 3;
   utl::Logger *logger = ord::getLogger();
-  stt::Tree tree = flt::flute(x, y, flute_accuracy);
+  stt::Tree tree = flt::flute(x, y, l, flute_accuracy);
   stt::reportSteinerTree(tree, x[drvr_index], y[drvr_index], logger);
 }
 
 void
 report_pd_tree(std::vector<int> x,
                std::vector<int> y,
+               std::vector<int> l,
                int drvr_index,
                float alpha)
 {
   utl::Logger *logger = ord::getLogger();
-  stt::Tree tree = pdr::primDijkstra(x, y, drvr_index, alpha, logger);
+  stt::Tree tree = pdr::primDijkstra(x, y, l, drvr_index, alpha, logger);
   stt::reportSteinerTree(tree, x[drvr_index], y[drvr_index], logger);
 }
 
 void
 report_stt_tree(std::vector<int> x,
                 std::vector<int> y,
+                std::vector<int> l,
                 int drvr_index,
                 float alpha)
 {
   utl::Logger *logger = ord::getLogger();
   auto builder = getSteinerTreeBuilder();
 
-  auto tree = builder->makeSteinerTree(x, y, drvr_index, alpha);
+  auto net = ord::OpenRoad::openRoad()->getDb()->getChip()->getBlock()->getNets().begin();
+  auto tree = builder->makeSteinerTree(*net, x, y, l, drvr_index, alpha);
   stt::reportSteinerTree(tree, x[drvr_index], y[drvr_index], logger);
 }
 
 void
 highlight_stt_tree(std::vector<int> x,
                    std::vector<int> y,
+                   std::vector<int> l,
                    int drvr_index,
                    float alpha)
 {
   auto builder = getSteinerTreeBuilder();
-  auto tree = builder->makeSteinerTree(x, y, drvr_index, alpha);
+
+  auto net = ord::OpenRoad::openRoad()->getDb()->getChip()->getBlock()->getNets().begin();
+  auto tree = builder->makeSteinerTree(*net, x, y, l, drvr_index, alpha);
 
   gui::Gui *gui = gui::Gui::get();
   stt::highlightSteinerTree(tree, gui);
@@ -139,21 +147,23 @@ highlight_stt_tree(std::vector<int> x,
 void
 highlight_pd_tree(std::vector<int> x,
                   std::vector<int> y,
+                  std::vector<int> l,
                   int drvr_index,
                   float alpha)
 {
   utl::Logger *logger = ord::getLogger();
   gui::Gui *gui = gui::Gui::get();
-  stt::Tree tree = pdr::primDijkstra(x, y, drvr_index, alpha, logger);
+  stt::Tree tree = pdr::primDijkstra(x, y, l, drvr_index, alpha, logger);
   stt::highlightSteinerTree(tree, gui);
 }
 
 void
 highlight_flute_tree(std::vector<int> x,
-                     std::vector<int> y)
+                     std::vector<int> y,
+                     std::vector<int> l)
 {
   gui::Gui *gui = gui::Gui::get();
-  stt::Tree tree = flt::flute(x, y, 3);
+  stt::Tree tree = flt::flute(x, y, l, 3);
   stt::highlightSteinerTree(tree, gui);
 }
 

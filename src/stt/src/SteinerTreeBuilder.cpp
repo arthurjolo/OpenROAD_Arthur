@@ -63,9 +63,11 @@ void SteinerTreeBuilder::init(odb::dbDatabase* db, Logger* logger)
 
 Tree SteinerTreeBuilder::makeSteinerTree(const std::vector<int>& x,
                                          const std::vector<int>& y,
+                                         const std::vector<int>& l,
                                          const int drvr_index)
 {
-  Tree tree = makeSteinerTree(x, y, drvr_index, alpha_);
+  auto net = db_->getChip()->getBlock()->getNets().begin();
+  Tree tree = makeSteinerTree(*net, x, y, l, drvr_index, alpha_);
 
   return tree;
 }
@@ -73,6 +75,7 @@ Tree SteinerTreeBuilder::makeSteinerTree(const std::vector<int>& x,
 Tree SteinerTreeBuilder::makeSteinerTree(odb::dbNet* net,
                                          const std::vector<int>& x,
                                          const std::vector<int>& y,
+                                         const std::vector<int>& l,
                                          const int drvr_index)
 {
   float net_alpha = alpha_;
@@ -91,30 +94,52 @@ Tree SteinerTreeBuilder::makeSteinerTree(odb::dbNet* net,
     }
   }
 
-  return makeSteinerTree(x, y, drvr_index, net_alpha);
+  return makeSteinerTree(net, x, y, l, drvr_index, net_alpha);
 }
 
-Tree SteinerTreeBuilder::makeSteinerTree(const std::vector<int>& x,
+Tree SteinerTreeBuilder::makeSteinerTree(odb::dbNet* net,
+                                         const std::vector<int>& x,
                                          const std::vector<int>& y,
+                                         const std::vector<int>& l,
                                          const int drvr_index,
                                          const float alpha)
 {
   if (alpha > 0.0) {
-    Tree tree = pdr::primDijkstra(x, y, drvr_index, alpha, logger_);
+    if(net->getName() == "b[332]") {
+      logger_->report("entrou certo");
+    }
+    Tree tree = pdr::primDijkstra(x, y, l, drvr_index, alpha, logger_);
     if (checkTree(tree)) {
       return tree;
     }
+    if(net->getName() == "b[332]") {
+      int branch_count = tree.branchCount();
+      for (int i = 0; i < branch_count; ++i) {
+        const Branch& branch = tree.branch[i];
+        const int x1 = branch.x;
+        const int y1 = branch.y;
+        const int l1 = branch.l;
+        logger_->report("Node {}: ({}, {}, {})", i, x1, y1, l1);
+      }
+    }
     // Fall back to flute if PD fails.
   }
-  return flt::flute(x, y, flute_accuracy);
+  if(net->getName() == "b[332]") {
+      logger_->report("chamou o flute");
+  }
+  return flt::flute(x, y, l, flute_accuracy);
+  if(net->getName() == "b[332]") {
+      logger_->report("voltou do flute");
+  }
 }
 
 Tree SteinerTreeBuilder::makeSteinerTree(const std::vector<int>& x,
                                          const std::vector<int>& y,
+                                         const std::vector<int>& l,
                                          const std::vector<int>& s,
                                          int accuracy)
 {
-  return flt::flutes(x, y, s, accuracy);
+  return flt::flutes(x, y, l, s, accuracy);
 }
 
 static bool rectAreaZero(const odb::Rect& rect)

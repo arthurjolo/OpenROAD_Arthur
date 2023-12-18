@@ -704,7 +704,7 @@ void GlobalRouter::findPins(Net* net,
 {
   root_idx = 0;
   const int max_routing_layer = getNetMaxRoutingLayer(net);
-
+  int cont = 0;
   for (Pin& pin : net->getPins()) {
     odb::Point pin_position = pin.getOnGridPosition();
     int conn_layer = pin.getConnectionLayer();
@@ -713,6 +713,9 @@ void GlobalRouter::findPins(Net* net,
     // grid to avoid PAD obstructions
     if ((pin.isConnectedToPadOrMacro() || pin.isPort()) && !net->isLocal()
         && gcells_offset_ != 0 && conn_layer <= max_routing_layer) {
+      if(net->getName() == "b[332]") {
+        std::cout<<"estou criando um pino fake"<<std::endl;
+      }
       createFakePin(pin, pin_position, layer, net);
     }
 
@@ -736,12 +739,17 @@ void GlobalRouter::findPins(Net* net,
       }
 
       if (!invalid) {
+        if(pin.getName() == "a1/_08384_/A") {
+          logger_->report("Pin idx: {}", cont);
+          logger_->report("  pos: ({}, {}, {})", pinX, pinY, conn_layer);
+        }
         pins_on_grid.push_back(RoutePt(pinX, pinY, conn_layer));
         if (pin.isDriver()) {
           root_idx = pins_on_grid.size() - 1;
         }
       }
     }
+    cont++;
   }
 }
 
@@ -866,9 +874,16 @@ bool GlobalRouter::makeFastrouteNet(Net* net)
     // See https://github.com/The-OpenROAD-Project/OpenROAD/pull/2893 and
     // https://github.com/The-OpenROAD-Project/OpenROAD/discussions/2870
     // for a detailed discussion
-
+    int cont = 0;
     for (RoutePt& pin_pos : pins_on_grid) {
+      if (net->getName() == "b[332]") {
+        logger_->report("Pin: ({}, {}, {})", pin_pos.x(), pin_pos.y(), pin_pos.layer());
+      }
       fr_net->addPin(pin_pos.x(), pin_pos.y(), pin_pos.layer() - 1);
+      if(net->getName() == "b[332]" && cont == 11) {
+          logger_->report("Adicionou certo: {}", pin_pos.layer());
+        }
+      cont++;
     }
 
     // Save stt input on debug file

@@ -104,11 +104,14 @@ void FastRouteCore::copyStTree(const int ind, const Tree& rsmt)
   for (int i = 0; i < numnodes; i++) {
     const int x1 = rsmt.branch[i].x;
     const int y1 = rsmt.branch[i].y;
+    const int l1 = rsmt.branch[i].l;
     const int n = rsmt.branch[i].n;
     const int x2 = rsmt.branch[n].x;
     const int y2 = rsmt.branch[n].y;
     treenodes[i].x = x1;
     treenodes[i].y = y1;
+    treenodes[i].l = l1;
+
     if (i < d) {
       treenodes[i].status = 2;
     } else {
@@ -240,6 +243,7 @@ void FastRouteCore::fluteNormal(const int netID,
 
     std::vector<int> tmp_xs(d);
     std::vector<int> tmp_ys(d);
+    std::vector<int> tmp_ls(d);
     std::vector<int> s(d);
     pnt* pt = new pnt[d];
     std::vector<pnt*> ptp(d);
@@ -309,7 +313,7 @@ void FastRouteCore::fluteNormal(const int netID,
       tmp_ys[i] = ys[i] * ((int) (100 * coeffV));
     }
 
-    t = stt_builder_->makeSteinerTree(tmp_xs, tmp_ys, s, acc);
+    t = stt_builder_->makeSteinerTree(tmp_xs, tmp_ys, tmp_ls, s, acc);
 
     for (auto& branch : t.branch) {
       branch.x /= 100;
@@ -406,6 +410,7 @@ void FastRouteCore::fluteCongest(const int netID,
     std::vector<int> ys(d);
     std::vector<int> nxs(d);
     std::vector<int> nys(d);
+    std::vector<int> nls(d);
     std::vector<int> x_seg(d - 1);
     std::vector<int> y_seg(d - 1);
     std::vector<int> s(d);
@@ -458,7 +463,7 @@ void FastRouteCore::fluteCongest(const int netID,
       nys[i + 1] = nys[i] + y_seg[i];
     }
 
-    t = stt_builder_->makeSteinerTree(nxs, nys, s, acc);
+    t = stt_builder_->makeSteinerTree(nxs, nys, nls, s, acc);
 
     // map the new coordinates back to original coordinates
     for (auto& branch : t.branch) {
@@ -708,8 +713,11 @@ void FastRouteCore::gen_brk_RSMT(const bool congestionDriven,
     // TODO: move this flute implementation to SteinerTreeBuilder
     const float net_alpha = stt_builder_->getAlpha(net->getDbNet());
     if (net_alpha > 0.0) {
+      if(strcmp(net->getName(), "b[332]") == 0) {
+        logger_->report("net alfa: {}", net_alpha);
+      }
       rsmt = stt_builder_->makeSteinerTree(
-          net->getDbNet(), net->getPinX(), net->getPinY(), net->getDriverIdx());
+          net->getDbNet(), net->getPinX(), net->getPinY(), net->getPinL(), net->getDriverIdx());
     } else {
       if (congestionDriven) {
         // call congestion driven flute to generate RSMT
@@ -727,6 +735,9 @@ void FastRouteCore::gen_brk_RSMT(const bool congestionDriven,
         // call FLUTE to generate RSMT for each net
         fluteNormal(
             i, net->getPinX(), net->getPinY(), flute_accuracy, coeffV, rsmt);
+      }
+      for(auto b : rsmt.branch) {
+        b.l = -1;
       }
     }
     if (debug_->isOn() && debug_->steinerTree_
