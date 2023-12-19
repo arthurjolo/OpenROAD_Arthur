@@ -92,12 +92,11 @@ set_min_hpwl_alpha(int hpwl, float alpha)
 
 void report_flute_tree(std::vector<int> x,
                        std::vector<int> y,
-                       std::vector<int> l,
                        int drvr_index)
 {
   const int flute_accuracy = 3;
   utl::Logger *logger = ord::getLogger();
-  stt::Tree tree = flt::flute(x, y, l, flute_accuracy);
+  stt::Tree tree = flt::flute(x, y, flute_accuracy);
   stt::reportSteinerTree(tree, x[drvr_index], y[drvr_index], logger);
 }
 
@@ -159,11 +158,10 @@ highlight_pd_tree(std::vector<int> x,
 
 void
 highlight_flute_tree(std::vector<int> x,
-                     std::vector<int> y,
-                     std::vector<int> l)
+                     std::vector<int> y)
 {
   gui::Gui *gui = gui::Gui::get();
-  stt::Tree tree = flt::flute(x, y, l, 3);
+  stt::Tree tree = flt::flute(x, y, 3);
   stt::highlightSteinerTree(tree, gui);
 }
 

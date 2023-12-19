@@ -127,7 +127,7 @@ Tree SteinerTreeBuilder::makeSteinerTree(odb::dbNet* net,
   if(net->getName() == "b[332]") {
       logger_->report("chamou o flute");
   }
-  return flt::flute(x, y, l, flute_accuracy);
+  return flt::flute(x, y, flute_accuracy);
   if(net->getName() == "b[332]") {
       logger_->report("voltou do flute");
   }
@@ -139,7 +139,7 @@ Tree SteinerTreeBuilder::makeSteinerTree(const std::vector<int>& x,
                                          const std::vector<int>& s,
                                          int accuracy)
 {
-  return flt::flutes(x, y, l, s, accuracy);
+  return flt::flutes(x, y, s, accuracy);
 }
 
 static bool rectAreaZero(const odb::Rect& rect)

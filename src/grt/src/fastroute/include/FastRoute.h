@@ -458,6 +458,7 @@ class FastRouteCore
   // utility functions
   void printEdge(const int netID, const int edgeID);
   void ConvertToFull3DType2();
+  void viaStack(int netID, int nodeID, int &bot_pin_l, int &top_pin_l);
   void fillVIA();
   int threeDVIA();
   void fixEdgeAssignment(int& net_layer,

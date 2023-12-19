@@ -172,6 +172,31 @@ void FastRouteCore::netpinOrderInc()
   std::stable_sort(tree_order_pv_.begin(), tree_order_pv_.end(), comparePVPV);
 }
 
+/*returns the start and end of the stack necessary to reach a node*/
+void FastRouteCore::viaStack(int netID, int nodeID, int &bot_pin_l, int &top_pin_l)
+{
+  FrNet* net = nets_[netID];
+  const auto& treenodes = sttrees_[netID].nodes;
+  int num_terminals = sttrees_[netID].num_terminals;
+  int node_x = treenodes[nodeID].x;
+  int node_y = treenodes[nodeID].y;
+  bot_pin_l = BIG_INT;
+  top_pin_l = -1;
+
+  const auto pin_X = net->getPinX();
+  const auto pin_Y = net->getPinY();
+  const auto pin_L = net->getPinL();
+
+  for(int p = 0; p < pin_L.size(); p++) {
+    if(pin_X[p] == node_x && pin_Y[p] == node_y){
+      bot_pin_l = std::min(bot_pin_l, pin_L[p]);
+      top_pin_l = std::max(top_pin_l, pin_L[p]);
+    }
+  }
+  
+
+}
+
 void FastRouteCore::fillVIA()
 {
   short tmpX[MAXLEN], tmpY[MAXLEN], tmpL[MAXLEN];
@@ -192,34 +217,6 @@ void FastRouteCore::fillVIA()
       TreeEdge* treeedge = &(treeedges[edgeID]);
       int node1_alias = treeedge->n1a;
       int node2_alias = treeedge->n2a;
-      if((strcmp(nets_[netID]->getName(), "b[332]") == 0)) {
-        if ((treenodes[node1_alias].x == 146 && treenodes[node1_alias].y == 29)
-            || (treenodes[node2_alias].x == 146 && treenodes[node2_alias].y == 29)) {
-          logger_->report("\tnode1: ({}, {}), aliasHID: {}, aliasLID: {}, botL: {}, topL: {}",
-                                  treenodes[node1_alias].x,
-                                  treenodes[node1_alias].y,
-                                  treenodes[node1_alias].hID,
-                                  treenodes[node1_alias].lID,
-                                  treenodes[node1_alias].botL,
-                                  treenodes[node1_alias].topL);
-          if(node1_alias < num_terminals) {
-            logger_->report("node1_alias: {}, node1: {}", node1_alias, treeedge->n1);
-            logger_->report("node1_alias layer: {}", nets_[netID]->getPinL(node1_alias));
-            logger_->report("node1 layer: {}", nets_[netID]->getPinL(treeedge->n1));
-          }
-          logger_->report("\tnode2: ({}, {}), aliasHID: {}, aliasLID: {}, botL: {}, topL: {}",
-                                  treenodes[node2_alias].x,
-                                  treenodes[node2_alias].y,
-                                  treenodes[node2_alias].hID,
-                                  treenodes[node2_alias].lID,
-                                  treenodes[node2_alias].botL,
-                                  treenodes[node2_alias].topL);
-          logger_->report("node2_alias: {}, node2: {}", node2_alias, treeedge->n2);
-          if(node2_alias < num_terminals) {
-            logger_->report("node2 layer: {}", nets_[netID]->getPinL(node2_alias));
-          }
-        }
-      }
       if (treeedge->len > 0) {
         int newCNT = 0;
         int routeLen = treeedge->route.routelen;
@@ -230,18 +227,24 @@ void FastRouteCore::fillVIA()
         if (node1_alias < num_terminals) {
           if (treenodes[node1_alias].hID == BIG_INT
               && edgeID == treenodes[node1_alias].lID) {
-            const int n1a_access_layer = nets_[netID]->getPinL()[node1_alias];
-
-            // Connect edge to pin n1 if not on the same layer
-            if (gridsL[0] != n1a_access_layer) {
-              int diff = gridsL[0] - n1a_access_layer;
-              for (int i = 0; i < abs(diff); i++) {
-                tmpX[newCNT] = gridsX[0];
-                tmpY[newCNT] = gridsY[0];
-                tmpL[newCNT] = n1a_access_layer + i * (diff / abs(diff));
-                newCNT++;
-                numVIAT1++;
-              }
+            int pin_botL, pin_topL;
+            int edge_init = gridsL[0];
+            viaStack(netID, node1_alias, pin_botL, pin_topL);
+            pin_botL = std::min(pin_botL, edge_init);
+            pin_topL = std::max(pin_topL, edge_init);
+            for (int l = pin_botL; l <= pin_topL; l++) {
+              tmpX[newCNT] = gridsX[0];
+              tmpY[newCNT] = gridsY[0];
+              tmpL[newCNT] = l;
+              newCNT++;
+              numVIAT1++;
+            }
+            for (int l = pin_topL; l > edge_init; l--) {
+              tmpX[newCNT] = gridsX[0];
+              tmpY[newCNT] = gridsY[0];
+              tmpL[newCNT] = l;
+              newCNT++;
+              numVIAT1++;
             }
           }
         }
@@ -305,18 +308,26 @@ void FastRouteCore::fillVIA()
 
         if (node2_alias < num_terminals && treenodes[node2_alias].hID == BIG_INT
             && edgeID == treenodes[node2_alias].lID) {
-          const int n2a_access_layer = nets_[netID]->getPinL()[node2_alias];
+          int pin_botL, pin_topL;
+          int edge_init = tmpL[newCNT-1];
+          viaStack(netID, node1_alias, pin_botL, pin_topL);
+          pin_botL = std::min(pin_botL, edge_init);
+          pin_topL = std::max(pin_topL, edge_init);
 
-          // Connect edge to pin n2 if not on the same layer
-          if (tmpL[newCNT - 1] != n2a_access_layer) {
-            int diff = n2a_access_layer - tmpL[newCNT - 1];
-            for (int i = 1; i <= abs(diff); i++) {
-              tmpX[newCNT] = tmpX[newCNT - 1];
-              tmpY[newCNT] = tmpY[newCNT - 1];
-              tmpL[newCNT] = tmpL[newCNT - 1] + (diff / abs(diff));
-              newCNT++;
-              numVIAT1++;
-            }
+          for (int l = edge_init; l > pin_botL; l--) {
+            tmpX[newCNT] = tmpX[newCNT - 1];
+            tmpY[newCNT] = tmpY[newCNT - 1];
+            tmpL[newCNT] = l;
+            newCNT++;
+            numVIAT1++;
+          }
+
+          for (int l = pin_botL; l <= pin_topL; l++) {
+            tmpX[newCNT] = tmpX[newCNT - 1];
+            tmpY[newCNT] = tmpY[newCNT - 1];
+            tmpL[newCNT] = l;
+            newCNT++;
+            numVIAT1++;
           }
         }
         if (treeedges[edgeID].route.type == RouteType::MazeRoute) {
@@ -344,66 +355,7 @@ void FastRouteCore::fillVIA()
         }
         int l1 = treenodes[node1].botL;
         int l2 = treenodes[node2].botL;
-        
-        if ((strcmp(nets_[netID]->getName(), "b[332]") == 0)) {
-          logger_->report("\route len antes: {}", treeedge->route.routelen);
-          if(node1 < num_terminals) {
-            logger_->report("\tnode1 terminal");
-            logger_->report("\tnode1: ({}, {}, {}), aliasHID: {}, aliasLID: {}, botL: {}, topL: {}, aliasbotL: {}, alias topL: {}",
-                                treenodes[node1].x,
-                                treenodes[node1].y,
-                                nets_[netID]->getPinL(node1),
-                                treenodes[node1].hID,
-                                treenodes[node1].lID,
-                                treenodes[node1].botL,
-                                treenodes[node1].topL,
-                                treenodes[node1_alias].botL,
-                                treenodes[node1_alias].topL);
-          } else {
-            logger_->report("\tnode1: ({}, {}), aliasHID: {}, aliasLID: {}, botL: {}, topL: {}, aliasbotL: {}, alias topL: {}",
-                                treenodes[node1].x,
-                                treenodes[node1].y,
-                                treenodes[node1].hID,
-                                treenodes[node1].lID,
-                                treenodes[node1].botL,
-                                treenodes[node1].topL,
-                                treenodes[node1_alias].botL,
-                                treenodes[node1_alias].topL);
-          }
-          if(node2 < num_terminals) {
-            logger_->report("\tnode2 terminal");
-            logger_->report("\tnode2: ({}, {}, {}), HID: {}, LID: {}, botL: {}, topL: {}, aliasbotL: {}, alias topL: {}",
-                                treenodes[node2].x,
-                                treenodes[node2].y,
-                                nets_[netID]->getPinL(node2),
-                                treenodes[node2].hID,
-                                treenodes[node2].lID,
-                                treenodes[node2].botL,
-                                treenodes[node2].topL,
-                                treenodes[node2_alias].botL,
-                                treenodes[node2_alias].topL);
-          } else {
-            logger_->report("\tnode2: ({}, {}), HID: {}, LID: {}, botL: {}, topL: {}, aliasbotL: {}, alias topL: {}",
-                                treenodes[node2].x,
-                                treenodes[node2].y,
-                                treenodes[node2].hID,
-                                treenodes[node2].lID,
-                                treenodes[node2].botL,
-                                treenodes[node2].topL,
-                                treenodes[node2_alias].botL,
-                                treenodes[node2_alias].topL);
-          }
-          logger_->report("\t aliasHID: {}, aliasLID: {}", treenodes[node2_alias].hID,
-                                treenodes[node2_alias].lID);
-        }
-        /*just to enshure, if any of the nodes is a terminal get the correct bottom
-        if(node1 < num_terminals) {
-          l1 = std::min(nets_[netID]->getPinL(node1), l1);
-        }
 
-        if(node2 < num_terminals) {
-          l2 = std::min(nets_[netID]->getPinL(node2), l2);
-        }*/
         auto [bottom_layer, top_layer] = std::minmax(l1, l2);
         treeedge->route.gridsX.resize(top_layer - bottom_layer + 1, 0);
         treeedge->route.gridsY.resize(top_layer - bottom_layer + 1, 0);
@@ -416,54 +368,8 @@ void FastRouteCore::fillVIA()
           treeedge->route.gridsY[count] = treenodes[node1].y;
           treeedge->route.gridsL[count] = l;
           count ++;
-          /*if (strcmp(nets_[netID]->getName(), "a[720]") == 0)
-            logger_->report("\tadded: ({}, {}, {})", treenodes[node1].x,
-                                                    treenodes[node1].y,
-                                                    l);*/
-
         }
-
-        /*if (strcmp(nets_[netID]->getName(), "a[720]") == 0) {
-          for(int i = 0; i < treeedge->route.gridsX.size(); i++) {
-            logger_->report("\treadded: ({}, {}, {})", treeedge->route.gridsX[i],
-                                                    treeedge->route.gridsY[i],
-                                                    treeedge->route.gridsL[i]);
-          }
-          //logger_->report("\route len depois: {}", treeedge->route.routelen);
-        }*/
-      } else if (strcmp(nets_[netID]->getName(), "b[332]") == 0){
-        int node1 = treeedge->n1;
-        int node2 = treeedge->n2;
-        logger_->report("\route len antes: {}", treeedge->route.routelen);
-        if(node1 < num_terminals)
-          logger_->report("\tnode1 terminal");
-        logger_->report("\tnode1: ({}, {}, {}), aliasHID: {}, aliasLID: {}, botL: {}, topL: {}, aliasbotL: {}, alias topL: {}",
-                              treenodes[node1].x,
-                              treenodes[node1].y,
-                              nets_[netID]->getPinL(node1),
-                              treenodes[node1].hID,
-                              treenodes[node1].lID,
-                              treenodes[node1].botL,
-                              treenodes[node1].topL,
-                              treenodes[node1_alias].botL,
-                              treenodes[node1_alias].topL);
-        logger_->report("\t aliasHID: {}, aliasLID: {}", treenodes[node1_alias].hID,
-                              treenodes[node1_alias].lID);
-        if(node2 < num_terminals)
-          logger_->report("\tnode2 terminal");
-        logger_->report("\tnode2: ({}, {}, {}), HID: {}, LID: {}, botL: {}, topL: {}, aliasbotL: {}, alias topL: {}",
-                              treenodes[node2].x,
-                              treenodes[node2].y,
-                              nets_[netID]->getPinL(node2),
-                              treenodes[node2].hID,
-                              treenodes[node2].lID,
-                              treenodes[node2].botL,
-                              treenodes[node2].topL,
-                              treenodes[node2_alias].botL,
-                              treenodes[node2_alias].topL);
-        logger_->report("\t aliasHID: {}, aliasLID: {}", treenodes[node2_alias].hID,
-                              treenodes[node2_alias].lID);
-      }
+      } 
     }
   }
 
@@ -1810,17 +1716,15 @@ void FastRouteCore::printEdge2D(int netID, int edgeID)
 void FastRouteCore::printTree2D(int netID)
 {
   for (int nodeID = 0; nodeID < sttrees_[netID].num_nodes; nodeID++) {
-    logger_->report("nodeID {},  [{}, {}, {}]",
+    logger_->report("nodeID {},  [{}, {}]",
                     nodeID,
-                    sttrees_[netID].nodes[nodeID].x,
                     sttrees_[netID].nodes[nodeID].y,
-                    sttrees_[netID].nodes[nodeID].l
-                    );
+                    sttrees_[netID].nodes[nodeID].x);
   }
 
-  /*for (int edgeID = 0; edgeID < sttrees_[netID].num_edges(); edgeID++) {
+  for (int edgeID = 0; edgeID < sttrees_[netID].num_edges(); edgeID++) {
     printEdge2D(netID, edgeID);
-  }*/
+  }
 }
 
 bool FastRouteCore::skipNet(int netID)
