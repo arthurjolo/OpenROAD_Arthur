@@ -691,16 +691,6 @@ NetRouteMap FastRouteCore::getRoutes()
         const auto& nodes = sttrees_[netID].nodes;
         const TreeNode& node1 = nodes[treeedge->n1];
         const TreeNode& node2 = nodes[treeedge->n2];
-        if (strcmp(nets_[netID]->getName(), "b[332]") == 0) {
-          logger_->report("Edge {}", edgeID);
-          logger_->report("Len > 0");
-          if (treeedge->n1 < num_terminals) {
-            logger_->report("n1 is terminal: ({}, {}, {})", node1.x, node1.y, node1.botL + 1);
-          }
-          if (treeedge->n2 < num_terminals) {
-            logger_->report("n2 is terminal: ({}, {}, {})", node2.x, node2.y, node2.botL + 1);
-          }
-        }
 
         int routeLen = treeedge->route.routelen;
         const std::vector<short>& gridsX = treeedge->route.gridsX;
@@ -715,9 +705,6 @@ NetRouteMap FastRouteCore::getRoutes()
 
           GSegment segment
               = GSegment(lastX, lastY, lastL + 1, xreal, yreal, gridsL[i] + 1);
-          if (strcmp(nets_[netID]->getName(), "b[332]") == 0)
-            logger_->report("segment: ({}, {}, {}) --> ({}, {}, {})",
-                          lastX, lastY, lastL + 1, xreal, yreal, gridsL[i] + 1);
           lastX = xreal;
           lastY = yreal;
           lastL = gridsL[i];
@@ -726,49 +713,7 @@ NetRouteMap FastRouteCore::getRoutes()
             route.push_back(segment);
           }
         }
-      } /*else if () {
-        const auto& nodes = sttrees_[netID].nodes;
-        int x1 = tile_size_ * (nodes[treeedge->n1].x + 0.5) + x_corner_;
-        int y1 = tile_size_ * (nodes[treeedge->n1].y + 0.5) + y_corner_;
-        int l1 = nodes[treeedge->n1].botL;
-        int x2 = tile_size_ * (nodes[treeedge->n2].x + 0.5) + x_corner_;
-        int y2 = tile_size_ * (nodes[treeedge->n2].y + 0.5) + y_corner_;
-        int l2 = nodes[treeedge->n2].botL;
-        GSegment segment(x1, y1, l1 + 1, x2, y2, l2 + 1);
-        if (strcmp(nets_[netID]->getName(), "a[720]") == 0) {
-          logger_->report("Edge {}", edgeID);
-          logger_->report("Len = 0");
-          logger_->report("seg: ({}, {}, {}) --> ({}, {}, {})",
-                          x1,
-                          y1,
-                          l1 + 1,
-                          x2,
-                          y2,
-                          l2 + 1);
-        }
-        if (net_segs.find(segment) == net_segs.end()
-            && std::abs(l1 - l2) == 1) {
-          net_segs.insert(segment);
-          route.push_back(segment);
-          if (strcmp(nets_[netID]->getName(), "a[720]") == 0)
-            logger_->report("\tadded");
-        } else if (std::abs(l1 - l2) > 1 && isConnectingPins(treeedge, netID)) {
-          auto [bottom_layer, top_layer] = std::minmax(l1, l2);
-          for (int l = bottom_layer; l < top_layer; l++) {
-            GSegment segment(x1, y1, l + 1, x2, y2, l + 2);
-            if (strcmp(nets_[netID]->getName(), "a[720]") == 0)
-              logger_->report("\tstack: ({}, {}, {}) --> ({}, {}, {})",
-                              x1,
-                              y1,
-                              l + 1,
-                              x2,
-                              y2,
-                              l + 2);
-            net_segs.insert(segment);
-            route.push_back(segment);
-          }
-        }
-      }*/
+      }
     }
   }
 
@@ -1086,8 +1031,6 @@ NetRouteMap FastRouteCore::run()
     }
   }
 
-  printTree2D(54604);
-
   SaveLastRouteLen();
 
   const int max_overflow_increases = 25;
@@ -1330,8 +1273,6 @@ NetRouteMap FastRouteCore::run()
     }
   }  // end overflow iterations
 
-  printTree2D(54604);
-
   // Debug mode Tree 2D after overflow iterations
   if (debug_->isOn() && debug_->tree2D_) {
     for (int netID = 0; netID < netCount(); netID++) {
@@ -1378,8 +1319,6 @@ NetRouteMap FastRouteCore::run()
     mazeRouteMSMDOrder3D(enlarge_, 0, 20);
     mazeRouteMSMDOrder3D(enlarge_, 0, 12);
   }
-
-  printTree2D(54604);
 
   fillVIA();
   const int finallength = getOverflow3D();

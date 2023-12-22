@@ -105,32 +105,13 @@ Tree SteinerTreeBuilder::makeSteinerTree(odb::dbNet* net,
                                          const float alpha)
 {
   if (alpha > 0.0) {
-    if(net->getName() == "b[332]") {
-      logger_->report("entrou certo");
-    }
     Tree tree = pdr::primDijkstra(x, y, l, drvr_index, alpha, logger_);
     if (checkTree(tree)) {
       return tree;
     }
-    if(net->getName() == "b[332]") {
-      int branch_count = tree.branchCount();
-      for (int i = 0; i < branch_count; ++i) {
-        const Branch& branch = tree.branch[i];
-        const int x1 = branch.x;
-        const int y1 = branch.y;
-        const int l1 = branch.l;
-        logger_->report("Node {}: ({}, {}, {})", i, x1, y1, l1);
-      }
-    }
     // Fall back to flute if PD fails.
   }
-  if(net->getName() == "b[332]") {
-      logger_->report("chamou o flute");
-  }
   return flt::flute(x, y, flute_accuracy);
-  if(net->getName() == "b[332]") {
-      logger_->report("voltou do flute");
-  }
 }
 
 Tree SteinerTreeBuilder::makeSteinerTree(const std::vector<int>& x,

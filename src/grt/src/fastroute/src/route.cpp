@@ -1266,8 +1266,10 @@ void FastRouteCore::spiralRouteAll()
       treenodes[d].status = 0;
 
       if (d < num_terminals) {
-        treenodes[d].botL = nets_[netID]->getPinL()[d];
-        treenodes[d].topL = nets_[netID]->getPinL()[d];
+        int pin_botL, pin_topL;
+        viaStack(netID, d, pin_botL, pin_topL);
+        treenodes[d].botL = pin_botL;
+        treenodes[d].topL = pin_topL;
         // treenodes[d].l = 0;
         treenodes[d].assigned = true;
         treenodes[d].status = 2;

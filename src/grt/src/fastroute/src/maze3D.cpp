@@ -144,8 +144,21 @@ void FastRouteCore::setupHeap3D(int netID,
   if (num_terminals == 2) {  // 2-pin net
     const int node1_alias = treenodes[n1].stackAlias;
     const int node2_alias = treenodes[n2].stackAlias;
-    const int node1_access_layer = nets_[netID]->getPinL()[node1_alias];
-    const int node2_access_layer = nets_[netID]->getPinL()[node2_alias];
+
+    int node1_access_layer, node2_access_layer;
+    if (nets_[netID]->getPinX()[node1_alias] == x1
+        && nets_[netID]->getPinY()[node1_alias] == y1) {
+      node1_access_layer = nets_[netID]->getPinL()[node1_alias];
+    } else {
+      node1_access_layer = 0;
+    }
+
+    if (nets_[netID]->getPinX()[node2_alias] == x2
+        && nets_[netID]->getPinY()[node2_alias] == y2) {
+      node2_access_layer = nets_[netID]->getPinL()[node2_alias];
+    } else {
+      node2_access_layer = 0;
+    }
 
     d1_3D[node1_access_layer][y1][x1] = 0;
     directions_3D[node1_access_layer][y1][x1] = Direction::Origin;

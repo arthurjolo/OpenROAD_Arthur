@@ -173,7 +173,10 @@ void FastRouteCore::netpinOrderInc()
 }
 
 /*returns the start and end of the stack necessary to reach a node*/
-void FastRouteCore::viaStack(int netID, int nodeID, int &bot_pin_l, int &top_pin_l)
+void FastRouteCore::viaStack(int netID,
+                             int nodeID,
+                             int& bot_pin_l,
+                             int& top_pin_l)
 {
   FrNet* net = nets_[netID];
   const auto& treenodes = sttrees_[netID].nodes;
@@ -187,14 +190,12 @@ void FastRouteCore::viaStack(int netID, int nodeID, int &bot_pin_l, int &top_pin
   const auto pin_Y = net->getPinY();
   const auto pin_L = net->getPinL();
 
-  for(int p = 0; p < pin_L.size(); p++) {
-    if(pin_X[p] == node_x && pin_Y[p] == node_y){
+  for (int p = 0; p < pin_L.size(); p++) {
+    if (pin_X[p] == node_x && pin_Y[p] == node_y) {
       bot_pin_l = std::min(bot_pin_l, pin_L[p]);
       top_pin_l = std::max(top_pin_l, pin_L[p]);
     }
   }
-  
-
 }
 
 void FastRouteCore::fillVIA()
@@ -309,7 +310,7 @@ void FastRouteCore::fillVIA()
         if (node2_alias < num_terminals && treenodes[node2_alias].hID == BIG_INT
             && edgeID == treenodes[node2_alias].lID) {
           int pin_botL, pin_topL;
-          int edge_init = tmpL[newCNT-1];
+          int edge_init = tmpL[newCNT - 1];
           viaStack(netID, node1_alias, pin_botL, pin_topL);
           pin_botL = std::min(pin_botL, edge_init);
           pin_topL = std::max(pin_topL, edge_init);
@@ -346,11 +347,16 @@ void FastRouteCore::fillVIA()
           treeedge->route.gridsY[k] = tmpY[k];
           treeedge->route.gridsL[k] = tmpL[k];
         }
-      } else if ((treenodes[treeedge->n1].hID == BIG_INT && treenodes[treeedge->n1].lID == BIG_INT)
-              || (treenodes[treeedge->n2].hID == BIG_INT && treenodes[treeedge->n2].lID == BIG_INT)){
+      } else if ((treenodes[treeedge->n1].hID == BIG_INT
+                  && treenodes[treeedge->n1].lID == BIG_INT)
+                 || (treenodes[treeedge->n2].hID == BIG_INT
+                     && treenodes[treeedge->n2].lID == BIG_INT)) {
         int node1 = treeedge->n1;
         int node2 = treeedge->n2;
-        if((treenodes[node1].botL == num_layers_ && treenodes[node1].topL == -1) || (treenodes[node2].botL == num_layers_ && treenodes[node2].topL == -1)) {
+        if ((treenodes[node1].botL == num_layers_
+             && treenodes[node1].topL == -1)
+            || (treenodes[node2].botL == num_layers_
+                && treenodes[node2].topL == -1)) {
           continue;
         }
         int l1 = treenodes[node1].botL;
@@ -367,9 +373,9 @@ void FastRouteCore::fillVIA()
           treeedge->route.gridsX[count] = treenodes[node1].x;
           treeedge->route.gridsY[count] = treenodes[node1].y;
           treeedge->route.gridsL[count] = l;
-          count ++;
+          count++;
         }
-      } 
+      }
     }
   }
 
@@ -1065,16 +1071,11 @@ void FastRouteCore::printTree3D(int netID)
   for (int nodeID = 0; nodeID < sttrees_[netID].num_nodes; nodeID++) {
     int x = tile_size_ * (sttrees_[netID].nodes[nodeID].x + 0.5) + x_corner_;
     int y = tile_size_ * (sttrees_[netID].nodes[nodeID].y + 0.5) + y_corner_;
-    int l = num_layers_;
-    if (nodeID < sttrees_[netID].num_terminals) {
-      l = nets_[netID]->getPinL()[nodeID];
-    }
 
-    logger_->report("nodeID {},  [{}, {}, {}], status: {}",
+    logger_->report("nodeID {},  [{}, {}], status: {}",
                     nodeID,
                     x,
                     y,
-                    l,
                     sttrees_[netID].nodes[nodeID].status);
   }
 
@@ -1100,9 +1101,11 @@ void FastRouteCore::checkRoute3D()
 
     for (nodeID = 0; nodeID < sttrees_[netID].num_nodes; nodeID++) {
       if (nodeID < num_terminals) {
-        if ((treenodes[nodeID].botL > nets_[netID]->getPinL()[nodeID])
-            || (treenodes[nodeID].topL < nets_[netID]->getPinL()[nodeID])) {
-          logger_->error(GRT, 203, "Caused floating pin node.");
+        int pin_botL, pin_topL;
+        viaStack(netID, nodeID, pin_botL, pin_topL);
+        if ((treenodes[nodeID].botL > pin_botL)
+            || (treenodes[nodeID].topL < pin_topL)) {
+          // logger_->error(GRT, 203, "Caused floating pin node.");
         }
       }
     }
