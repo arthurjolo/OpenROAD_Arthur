@@ -2615,7 +2615,7 @@ void FastRouteCore::saveCongestion(const int iter)
       out << "( " << rect.xMin() << ", "
           << rect.yMin() << " ) - ";
       out << "( " <<rect.xMax() << ", "
-          << rect.yMax() << ") on Layer - \n";
+          << rect.yMax() << ") on Layer -\n";
     }
   } else {
     logger_->error(

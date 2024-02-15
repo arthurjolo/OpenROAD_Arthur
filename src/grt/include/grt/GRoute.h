@@ -105,6 +105,7 @@ struct TileInformation
 {
   std::set<odb::dbNet*, cmpById> nets;
   TileCongestion congestion;
+  std::pair<int, int> gcell;
 };
 
 using NetsPerCongestedArea = std::map<std::pair<int, int>, TileInformation>;

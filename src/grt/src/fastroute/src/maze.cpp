@@ -2205,6 +2205,7 @@ void FastRouteCore::getCongestionGrid(
         const int usage = h_edges_[i][j].usage;
         const int capacity = h_edges_[i][j].cap;
         nets_in_congested_edges[{xreal, yreal}].congestion = {capacity, usage};
+        nets_in_congested_edges[{xreal, yreal}].gcell = {j, i};
       }
     }
   }
@@ -2212,7 +2213,7 @@ void FastRouteCore::getCongestionGrid(
   for (const auto& [edge, tile_info] : nets_in_congested_edges) {
     TileCongestion congestion = tile_info.congestion;
     const auto& segment
-        = GSegment(edge.first, edge.second, 1, edge.first, edge.second, 1);
+        = GSegment(tile_info.gcell.first, tile_info.gcell.second, 1, tile_info.gcell.first, tile_info.gcell.second, 1);
     const auto& horizontal_srcs
         = nets_in_congested_edges[{segment.init_x, segment.init_y}].nets;
     congestionGridH.push_back({segment, congestion, horizontal_srcs});
@@ -2228,6 +2229,7 @@ void FastRouteCore::getCongestionGrid(
         const int usage = v_edges_[i][j].usage;
         const int capacity = v_edges_[i][j].cap;
         nets_in_congested_edges[{xreal, yreal}].congestion = {capacity, usage};
+        nets_in_congested_edges[{xreal, yreal}].gcell = {j, i};
       }
     }
   }
@@ -2235,7 +2237,7 @@ void FastRouteCore::getCongestionGrid(
   for (const auto& [edge, tile_info] : nets_in_congested_edges) {
     TileCongestion congestion = tile_info.congestion;
     const auto& segment
-        = GSegment(edge.first, edge.second, 1, edge.first, edge.second, 1);
+        = GSegment(tile_info.gcell.first, tile_info.gcell.second, 1, tile_info.gcell.first, tile_info.gcell.second, 1);
     const auto& vertical_srcs
         = nets_in_congested_edges[{segment.init_x, segment.init_y}].nets;
     congestionGridV.push_back({segment, congestion, vertical_srcs});
