@@ -2591,10 +2591,10 @@ void FastRouteCore::saveCongestion(const int iter)
           << " usage:" << usage << " overflow:" << usage - capacity << "\n";
       odb::Rect rect = globalRoutingToBox(seg);
       out << "\tbbox = ";
-      out << "( " << rect.xMin() << ", "
-          << rect.yMin() << " ) - ";
-      out << "( " << rect.xMax() << ", "
-          << rect.yMax() << ") on Layer -\n";
+      out << "( " << seg.init_x << ", "
+          << seg.init_y << " ) - ";
+      out << "( " << seg.init_x << ", "
+          << seg.init_y << ") on Layer -\n";
     }
 
     for (auto& it : congestionGridsV) {
@@ -2612,10 +2612,10 @@ void FastRouteCore::saveCongestion(const int iter)
           << " usage:" << usage << " overflow:" << usage - capacity << "\n";
       odb::Rect rect = globalRoutingToBox(seg);
       out << "\tbbox = ";
-      out << "( " << rect.xMin() << ", "
-          << rect.yMin() << " ) - ";
-      out << "( " <<rect.xMax() << ", "
-          << rect.yMax() << ") on Layer -\n";
+      out << "( " << seg.init_x << ", "
+          << seg.init_y << " ) - ";
+      out << "( " << seg.init_x << ", "
+          << seg.init_y << ") on Layer -\n";
     }
   } else {
     logger_->error(

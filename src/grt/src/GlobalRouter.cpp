@@ -2299,6 +2299,16 @@ void GlobalRouter::createFakePin(Pin pin,
 {
   int original_x = pin_position.x();
   int original_y = pin_position.y();
+
+  int pinX_o
+      = (int) ((original_x - grid_->getXMin()) / grid_->getTileSize());
+  int pinY_0
+      = (int) ((original_y - grid_->getYMin()) / grid_->getTileSize());
+
+  if(net->getName() == "clknet_leaf_39_clock") {
+    logger_->report("pino posição origianl: ({}, {}, {})", pinX_o, pinY_0, 0);
+  }
+
   int conn_layer = layer->getRoutingLevel();
   GSegment pin_connection;
   pin_connection.init_layer = conn_layer;
