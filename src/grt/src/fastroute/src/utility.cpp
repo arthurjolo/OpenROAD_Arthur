@@ -2615,7 +2615,7 @@ void FastRouteCore::saveCongestion(const int iter)
       out << "( " << dbuToMicrons(rect.xMin()) << ", "
           << dbuToMicrons(rect.yMin()) << " ) - ";
       out << "( " << dbuToMicrons(rect.xMax()) << ", "
-          << dbuToMicrons(rect.yMax()) << ") on Layer -\n";
+          << dbuToMicrons(rect.yMax()) << ") on Layer - "<<seg.final_layer<<"\n";
     }
   } else {
     logger_->error(
