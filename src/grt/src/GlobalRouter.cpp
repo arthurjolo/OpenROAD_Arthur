@@ -869,7 +869,7 @@ bool GlobalRouter::makeFastrouteNet(Net* net)
 
     for (RoutePt& pin_pos : pins_on_grid) {
       if(net->getName() == "clknet_leaf_39_clock") {
-        logger_->report("pino adicionado: ({}, {}, {})", fastroute_->tile_size() * (pin_pos.x() + 0.5) + fastroute_->x_corner(), fastroute_->tile_size() * (pin_pos.y() + 0.5) + fastroute_->y_corner(), pin_pos.layer());
+        logger_->report("pino adicionado: ({}, {}, {})", pin_pos.x(), pin_pos.y(), pin_pos.layer());
       }
       fr_net->addPin(pin_pos.x(), pin_pos.y(), pin_pos.layer() - 1);
     }
