@@ -2591,10 +2591,10 @@ void FastRouteCore::saveCongestion(const int iter)
           << " usage:" << usage << " overflow:" << usage - capacity << "\n";
       odb::Rect rect = globalRoutingToBox(seg);
       out << "\tbbox = ";
-      out << "( " << dbuToMicrons(rect.xMin()) << ", "
-          << dbuToMicrons(rect.yMin()) << " ) - ";
-      out << "( " << dbuToMicrons(rect.xMax()) << ", "
-          << dbuToMicrons(rect.yMax()) << ") on Layer -\n";
+      out << "( " << rect.xMin() << ", "
+          << rect.yMin() << " ) - ";
+      out << "( " << rect.xMax() << ", "
+          << rect.yMax() << ") on Layer -\n";
     }
 
     for (auto& it : congestionGridsV) {
@@ -2612,10 +2612,10 @@ void FastRouteCore::saveCongestion(const int iter)
           << " usage:" << usage << " overflow:" << usage - capacity << "\n";
       odb::Rect rect = globalRoutingToBox(seg);
       out << "\tbbox = ";
-      out << "( " << dbuToMicrons(rect.xMin()) << ", "
-          << dbuToMicrons(rect.yMin()) << " ) - ";
-      out << "( " << dbuToMicrons(rect.xMax()) << ", "
-          << dbuToMicrons(rect.yMax()) << ") on Layer - "<<seg.final_layer<<"\n";
+      out << "( " << rect.xMin() << ", "
+          << rect.yMin() << " ) - ";
+      out << "( " <<rect.xMax() << ", "
+          << rect.yMax() << ") on Layer - "<<<<"\n";
     }
   } else {
     logger_->error(
