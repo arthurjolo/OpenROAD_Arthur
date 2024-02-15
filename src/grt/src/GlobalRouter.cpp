@@ -869,7 +869,7 @@ bool GlobalRouter::makeFastrouteNet(Net* net)
 
     for (RoutePt& pin_pos : pins_on_grid) {
       if(net->getName() == "clknet_leaf_39_clock") {
-        logger_->report("pino adicionado: ({}, {}, {})", fastroute_->tile_size() * (pin_pos.x() + 0.5) + fastroute_->x_corner_(), fastroute_->tile_size_() * (pin_pos.y() + 0.5) + fastroute_->y_corner_(), pin_pos.layer());
+        logger_->report("pino adicionado: ({}, {}, {})", fastroute_->tile_size() * (pin_pos.x() + 0.5) + fastroute_->x_corner(), fastroute_->tile_size() * (pin_pos.y() + 0.5) + fastroute_->y_corner(), pin_pos.layer());
       }
       fr_net->addPin(pin_pos.x(), pin_pos.y(), pin_pos.layer() - 1);
     }
@@ -2297,9 +2297,6 @@ void GlobalRouter::createFakePin(Pin pin,
                                  odb::dbTechLayer* layer,
                                  Net* net)
 {
-  if(net->getName() == "clknet_leaf_39_clock") {
-    logger_->report("esta vindo aqui: ");
-  }
   int original_x = pin_position.x();
   int original_y = pin_position.y();
   int conn_layer = layer->getRoutingLevel();
