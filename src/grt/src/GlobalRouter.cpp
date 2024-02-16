@@ -868,8 +868,11 @@ bool GlobalRouter::makeFastrouteNet(Net* net)
     // for a detailed discussion
 
     for (RoutePt& pin_pos : pins_on_grid) {
-      if(net->getName() == "clknet_leaf_39_clock") {
-        logger_->report("pino adicionado: ({}, {}, {})", pin_pos.x(), pin_pos.y(), pin_pos.layer());
+      if (net->getName() == "clknet_leaf_39_clock") {
+        logger_->report("pino adicionado: ({}, {}, {})",
+                        pin_pos.x(),
+                        pin_pos.y(),
+                        pin_pos.layer());
       }
       fr_net->addPin(pin_pos.x(), pin_pos.y(), pin_pos.layer() - 1);
     }
@@ -2300,12 +2303,10 @@ void GlobalRouter::createFakePin(Pin pin,
   int original_x = pin_position.x();
   int original_y = pin_position.y();
 
-  int pinX_o
-      = (int) ((original_x - grid_->getXMin()) / grid_->getTileSize());
-  int pinY_0
-      = (int) ((original_y - grid_->getYMin()) / grid_->getTileSize());
+  int pinX_o = (int) ((original_x - grid_->getXMin()) / grid_->getTileSize());
+  int pinY_0 = (int) ((original_y - grid_->getYMin()) / grid_->getTileSize());
 
-  if(net->getName() == "clknet_leaf_39_clock") {
+  if (net->getName() == "clknet_leaf_39_clock") {
     logger_->report("pino posição origianl: ({}, {}, {})", pinX_o, pinY_0, 0);
   }
 
@@ -2367,6 +2368,15 @@ void GlobalRouter::createFakePin(Pin pin,
   pin_connection.final_x = std::max(x_tmp, pin_connection.final_x);
   pin_connection.final_y = std::max(y_tmp, pin_connection.final_y);
 
+  // if there is already a pin with that fake position, don't add the gcell
+  // capacity adjustment.
+  if (std::find(net_pad_pin_connection.begin(),
+                net_pad_pin_connection.end(),
+                pin_connection)
+      == net_pad_pin_connection.end()) {
+    return;
+  }
+
   int pin_conn_init_x = pin_connection.init_x;
   int pin_conn_init_y = pin_connection.init_y;
 
@@ -2394,10 +2404,7 @@ void GlobalRouter::createFakePin(Pin pin,
     }
   }
 
-  auto net_pad_pin_connection = pad_pins_connections_[net->getDbNet()];
-  if(std::find(net_pad_pin_connection.begin(), net_pad_pin_connection.end(), pin_connection) != net_pad_pin_connection.end()) {
-    pad_pins_connections_[net->getDbNet()].push_back(pin_connection);
-  }
+  pad_pins_connections_[net->getDbNet()].push_back(pin_connection);
 }
 
 odb::Point GlobalRouter::findFakePinPosition(Pin& pin, odb::dbNet* db_net)
