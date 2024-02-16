@@ -2294,6 +2294,9 @@ void GlobalRouter::createFakePin(Pin pin,
                                  odb::dbTechLayer* layer,
                                  Net* net)
 {
+  if(net->getName() == "clknet_leaf_39_clock") {
+    logger_->report("original pos: ({}, {})", pin_position.x(), pin_position.y());
+  }
   int original_x = pin_position.x();
   int original_y = pin_position.y();
   int conn_layer = layer->getRoutingLevel();
@@ -2361,6 +2364,9 @@ void GlobalRouter::createFakePin(Pin pin,
                 net_pad_pin_connection.end(),
                 pin_connection)
       != net_pad_pin_connection.end()) {
+    if(net->getName() == "clknet_leaf_39_clock") {
+      logger_->report("original pos: ({}, {})", original_x, original_y);
+    }
     return;
   }
 
