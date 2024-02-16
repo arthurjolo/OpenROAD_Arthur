@@ -868,9 +868,12 @@ bool GlobalRouter::makeFastrouteNet(Net* net)
     // for a detailed discussion
 
     for (RoutePt& pin_pos : pins_on_grid) {
-      if(net->getName() == "clknet_leaf_39_clock") {
-      logger_->report(" pin added: ({}, {}, {})", pin_pos.x(), pin_pos.y(), pin_pos.layer());
-    }
+      if (net->getName() == "clknet_leaf_39_clock") {
+        logger_->report(" pin added: ({}, {}, {})",
+                        pin_pos.x(),
+                        pin_pos.y(),
+                        pin_pos.layer());
+      }
       fr_net->addPin(pin_pos.x(), pin_pos.y(), pin_pos.layer() - 1);
     }
 
@@ -2300,8 +2303,9 @@ void GlobalRouter::createFakePin(Pin pin,
                                  odb::dbTechLayer* layer,
                                  Net* net)
 {
-  if(net->getName() == "clknet_leaf_39_clock") {
-    logger_->report("\noriginal pos: ({}, {})", pin_position.x(), pin_position.y());
+  if (net->getName() == "clknet_leaf_39_clock") {
+    logger_->report(
+        "\noriginal pos: ({}, {})", pin_position.x(), pin_position.y());
   }
   int original_x = pin_position.x();
   int original_y = pin_position.y();
@@ -2365,15 +2369,19 @@ void GlobalRouter::createFakePin(Pin pin,
 
   // if there is already a pin with that fake position, don't add the gcell
   // capacity adjustment.
-  if(net->getName() == "clknet_leaf_39_clock") {
-    logger_->report("fake pin guide: ({}, {}) -> ({}, {})", pin_connection.init_x, pin_connection.init_y, pin_connection.final_x, pin_connection.final_y);
+  if (net->getName() == "clknet_leaf_39_clock") {
+    logger_->report("fake pin guide: ({}, {}) -> ({}, {})",
+                    pin_connection.init_x,
+                    pin_connection.init_y,
+                    pin_connection.final_x,
+                    pin_connection.final_y);
   }
   auto& net_pad_pin_connection = pad_pins_connections_[net->getDbNet()];
   if (std::find(net_pad_pin_connection.begin(),
                 net_pad_pin_connection.end(),
                 pin_connection)
       != net_pad_pin_connection.end()) {
-    if(net->getName() == "clknet_leaf_39_clock") {
+    if (net->getName() == "clknet_leaf_39_clock") {
       logger_->report("esta vindo por aqui");
     }
     return;
@@ -2386,7 +2394,8 @@ void GlobalRouter::createFakePin(Pin pin,
   int pin_conn_final_y = pin_connection.final_y;
 
   for (Pin& net_pin : net->getPins()) {
-    if (net_pin.getName() != pin.getName()) {
+    if (net_pin.getName() != pin.getName()
+        && !(net_pin.isConnectedToPadOrMacro() || net_pin.isPort())) {
       auto net_pin_pos = net_pin.getOnGridPosition();
       if (pin_connection.init_y == pin_connection.final_y) {
         if ((net_pin_pos.x() >= pin_conn_init_x)
