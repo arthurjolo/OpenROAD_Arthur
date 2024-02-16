@@ -2363,7 +2363,7 @@ void GlobalRouter::createFakePin(Pin pin,
       == net_pad_pin_connection.end()) {
     return;
   }
-  
+
   int pin_conn_init_x = pin_connection.init_x;
   int pin_conn_init_y = pin_connection.init_y;
 
