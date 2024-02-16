@@ -2370,6 +2370,7 @@ void GlobalRouter::createFakePin(Pin pin,
 
   // if there is already a pin with that fake position, don't add the gcell
   // capacity adjustment.
+  auto net_pad_pin_connection = pad_pins_connections_[net->getDbNet()];
   if (std::find(net_pad_pin_connection.begin(),
                 net_pad_pin_connection.end(),
                 pin_connection)
