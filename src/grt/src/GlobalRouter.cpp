@@ -2394,7 +2394,10 @@ void GlobalRouter::createFakePin(Pin pin,
     }
   }
 
-  pad_pins_connections_[net->getDbNet()].push_back(pin_connection);
+  auto net_pad_pin_connection = pad_pins_connections_[net->getDbNet()];
+  if(std::find(net_pad_pin_connection.begin(), net_pad_pin_connection.end(), pin_connection) != net_pad_pin_connection.end())
+    pad_pins_connections_[net->getDbNet()].push_back(pin_connection);
+  }
 }
 
 odb::Point GlobalRouter::findFakePinPosition(Pin& pin, odb::dbNet* db_net)
