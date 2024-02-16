@@ -2360,7 +2360,7 @@ void GlobalRouter::createFakePin(Pin pin,
   if (std::find(net_pad_pin_connection.begin(),
                 net_pad_pin_connection.end(),
                 pin_connection)
-      == net_pad_pin_connection.end()) {
+      != net_pad_pin_connection.end()) {
     return;
   }
 
