@@ -2395,7 +2395,7 @@ void GlobalRouter::createFakePin(Pin pin,
   }
 
   auto net_pad_pin_connection = pad_pins_connections_[net->getDbNet()];
-  if(std::find(net_pad_pin_connection.begin(), net_pad_pin_connection.end(), pin_connection) != net_pad_pin_connection.end())
+  if(std::find(net_pad_pin_connection.begin(), net_pad_pin_connection.end(), pin_connection) != net_pad_pin_connection.end()) {
     pad_pins_connections_[net->getDbNet()].push_back(pin_connection);
   }
 }
