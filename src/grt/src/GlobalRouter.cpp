@@ -2370,7 +2370,8 @@ void GlobalRouter::createFakePin(Pin pin,
   // if there is already a pin with that fake position, don't add the gcell
   // capacity adjustment.
   if (net->getName() == "clknet_leaf_39_clock") {
-    logger_->report("fake pin guide: ({}, {}) -> ({}, {})",
+    logger_->report("fake pin {} guide: ({}, {}) -> ({}, {})",
+                    pin.getName(),
                     pin_connection.init_x,
                     pin_connection.init_y,
                     pin_connection.final_x,
@@ -2381,9 +2382,6 @@ void GlobalRouter::createFakePin(Pin pin,
                 net_pad_pin_connection.end(),
                 pin_connection)
       != net_pad_pin_connection.end()) {
-    if (net->getName() == "clknet_leaf_39_clock") {
-      logger_->report("esta vindo por aqui");
-    }
     return;
   }
 
@@ -2413,6 +2411,9 @@ void GlobalRouter::createFakePin(Pin pin,
         }
       }
     }
+  }
+  if (net->getName() == "clknet_leaf_39_clock") {
+    logger_->report(" final pos: ({}, {})", pin_position.x(), pin_position.y());
   }
 
   pad_pins_connections_[net->getDbNet()].push_back(pin_connection);
