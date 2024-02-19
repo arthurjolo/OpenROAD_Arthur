@@ -1074,7 +1074,7 @@ void GlobalRouter::computePinOffsetAdjustments()
   for (auto& net_route_fake_pins : pad_pins_connections_) {
     std::vector<Pin>& pins = db_net_map_[net_route_fake_pins.first]->getPins();
     GRoute& route = net_route_fake_pins.second;
-    mergeSegments(pins, route);
+    //mergeSegments(pins, route);
     for (auto& segment : net_route_fake_pins.second) {
       int tile_size = grid_->getTileSize();
       int die_area_min_x = grid_->getXMin();
