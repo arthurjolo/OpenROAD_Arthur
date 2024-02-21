@@ -868,6 +868,9 @@ bool GlobalRouter::makeFastrouteNet(Net* net)
     // for a detailed discussion
 
     for (RoutePt& pin_pos : pins_on_grid) {
+      if(net->getName() == "clknet_leaf_39_clock") {
+        logger_->report("pin added: ({}, {}, {})", pin_pos.x(), pin_pos.y(), pin_pos.layer())
+      }
       fr_net->addPin(pin_pos.x(), pin_pos.y(), pin_pos.layer() - 1);
     }
 
@@ -1074,7 +1077,7 @@ void GlobalRouter::computePinOffsetAdjustments()
   for (auto& net_route_fake_pins : pad_pins_connections_) {
     std::vector<Pin>& pins = db_net_map_[net_route_fake_pins.first]->getPins();
     GRoute& route = net_route_fake_pins.second;
-    //mergeSegments(pins, route);
+    mergeSegments(pins, route);
     for (auto& segment : net_route_fake_pins.second) {
       int tile_size = grid_->getTileSize();
       int die_area_min_x = grid_->getXMin();
@@ -2310,6 +2313,12 @@ void GlobalRouter::createFakePin(Pin pin,
   pin_connection.final_y = pin_position.y();
   const bool is_port = pin.isPort();
   const PinEdge edge = pin.getEdge();
+
+  if(net->getName() == "clknet_leaf_39_clock") {
+    int gcell_x = (int) ((original_x - grid_->getXMin()) / grid_->getTileSize());
+    int gcell_y =(int) ((original_y - grid_->getXMin()) / grid_->getTileSize());
+    logger_->report("pin original pos: ({}, {})", gcell_x, gcell_y);
+  }
 
   if ((edge == PinEdge::east && !is_port)
       || (edge == PinEdge::west && is_port)) {
