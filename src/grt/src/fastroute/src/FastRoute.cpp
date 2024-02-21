@@ -619,6 +619,32 @@ int FastRouteCore::getEdgeCapacity(FrNet* net,
   return cap;
 }
 
+int FastRouteCore::getEdgeCapacity(int x1,
+                                   int y1,
+                                   bool vertical) 
+{
+  
+  FrNet* net;
+  int cap = 0;
+
+  for (int netID = 0; netID < netCount(); netID++) {
+    if (nets_[netID]->getDbNet() == debug_->net_ && !skipNet(netID)) {
+      net = nets_[netID];
+    }
+  }
+
+  // get 2D edge capacity respecting layer restrictions
+  for (int l = net->getMinLayer(); l <= net->getMaxLayer(); l++) {
+    if (vertical) {
+      cap += v_edges_3D_[l][y1][x1].cap;
+    } else {
+      cap += h_edges_3D_[l][y1][x1].cap;
+    }
+  }
+
+  return cap;
+}
+
 void FastRouteCore::incrementEdge3DUsage(int x1,
                                          int y1,
                                          int x2,

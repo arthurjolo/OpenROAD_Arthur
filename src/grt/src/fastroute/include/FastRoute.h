@@ -162,6 +162,7 @@ class FastRouteCore
   const std::vector<short>& getVerticalCapacities() { return v_capacity_3D_; }
   const std::vector<short>& getHorizontalCapacities() { return h_capacity_3D_; }
   int getEdgeCapacity(int x1, int y1, int x2, int y2, int layer);
+  int getEdgeCapacity(int x1, int y1, bool vertical);
   const multi_array<Edge3D, 3>& getHorizontalEdges3D() { return h_edges_3D_; }
   const multi_array<Edge3D, 3>& getVerticalEdges3D() { return v_edges_3D_; }
   void setLastColVCapacity(short cap, int layer)
