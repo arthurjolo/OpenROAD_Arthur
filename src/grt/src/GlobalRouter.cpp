@@ -206,34 +206,54 @@ void GlobalRouter::applyAdjustments(int min_routing_layer,
 {
   fastroute_->initEdges();
   logger_->report("init eges: ");
-  logger_->report("edge ({}, {}) -> ({}, {}) vertical cap: ", 344, 54, 344, 53, fastroute_->getEdgeCapacity(344, 54, true));
-  logger_->report("edge ({}, {}) -> ({}, {}) horizontal cap: ", 344, 54, 344, 53, fastroute_->getEdgeCapacity(344, 54, false));
-  logger_->report("edge ({}, {}) -> ({}, {}) vertical cap: ", 344, 53, 344, 52, fastroute_->getEdgeCapacity(344, 53, true));
-  logger_->report("edge ({}, {}) -> ({}, {}) horizontal cap: ", 344, 53, 344, 52, fastroute_->getEdgeCapacity(344, 53, false));
+  logger_->report("edge ({}, {}) -> ({}, {}) vertical cap: {}", 344, 54, 344, 53, fastroute_->getEdgeCapacity(344, 54, true));
+  logger_->report("edge ({}, {}) -> ({}, {}) horizontal cap: {}", 344, 54, 344, 53, fastroute_->getEdgeCapacity(344, 54, false));
+  logger_->report("edge ({}, {}) -> ({}, {}) vertical cap: {}", 344, 53, 344, 52, fastroute_->getEdgeCapacity(344, 53, true));
+  logger_->report("edge ({}, {}) -> ({}, {}) horizontal cap: {}", 344, 53, 344, 52, fastroute_->getEdgeCapacity(344, 53, false));
   computeGridAdjustments(min_routing_layer, max_routing_layer);
   logger_->report("\ngrid adj: ");
-  logger_->report("edge ({}, {}) -> ({}, {}) vertical cap: ", 344, 54, 344, 53, fastroute_->getEdgeCapacity(344, 54, true));
-  logger_->report("edge ({}, {}) -> ({}, {}) horizontal cap: ", 344, 54, 344, 53, fastroute_->getEdgeCapacity(344, 54, false));
-  logger_->report("edge ({}, {}) -> ({}, {}) vertical cap: ", 344, 53, 344, 52, fastroute_->getEdgeCapacity(344, 53, true));
-  logger_->report("edge ({}, {}) -> ({}, {}) horizontal cap: ", 344, 53, 344, 52, fastroute_->getEdgeCapacity(344, 53, false));
+  logger_->report("edge ({}, {}) -> ({}, {}) vertical cap: {}", 344, 54, 344, 53, fastroute_->getEdgeCapacity(344, 54, true));
+  logger_->report("edge ({}, {}) -> ({}, {}) horizontal cap: {}", 344, 54, 344, 53, fastroute_->getEdgeCapacity(344, 54, false));
+  logger_->report("edge ({}, {}) -> ({}, {}) vertical cap: {}", 344, 53, 344, 52, fastroute_->getEdgeCapacity(344, 53, true));
+  logger_->report("edge ({}, {}) -> ({}, {}) horizontal cap: {}", 344, 53, 344, 52, fastroute_->getEdgeCapacity(344, 53, false));
   computeTrackAdjustments(min_routing_layer, max_routing_layer);
   logger_->report("\ntrack adj: ");
-  logger_->report("edge ({}, {}) -> ({}, {}) vertical cap: ", 344, 54, 344, 53, fastroute_->getEdgeCapacity(344, 54, true));
-  logger_->report("edge ({}, {}) -> ({}, {}) horizontal cap: ", 344, 54, 344, 53, fastroute_->getEdgeCapacity(344, 54, false));
-  logger_->report("edge ({}, {}) -> ({}, {}) vertical cap: ", 344, 53, 344, 52, fastroute_->getEdgeCapacity(344, 53, true));
-  logger_->report("edge ({}, {}) -> ({}, {}) horizontal cap: ", 344, 53, 344, 52, fastroute_->getEdgeCapacity(344, 53, false));
+  logger_->report("edge ({}, {}) -> ({}, {}) vertical cap: {}", 344, 54, 344, 53, fastroute_->getEdgeCapacity(344, 54, true));
+  logger_->report("edge ({}, {}) -> ({}, {}) horizontal cap: {}", 344, 54, 344, 53, fastroute_->getEdgeCapacity(344, 54, false));
+  logger_->report("edge ({}, {}) -> ({}, {}) vertical cap: {}", 344, 53, 344, 52, fastroute_->getEdgeCapacity(344, 53, true));
+  logger_->report("edge ({}, {}) -> ({}, {}) horizontal cap: {}", 344, 53, 344, 52, fastroute_->getEdgeCapacity(344, 53, false));
   computeObstructionsAdjustments();
   logger_->report("\nobs adj: ");
-  logger_->report("edge ({}, {}) -> ({}, {}) vertical cap: ", 344, 54, 344, 53, fastroute_->getEdgeCapacity(344, 54, true));
-  logger_->report("edge ({}, {}) -> ({}, {}) horizontal cap: ", 344, 54, 344, 53, fastroute_->getEdgeCapacity(344, 54, false));
-  logger_->report("edge ({}, {}) -> ({}, {}) vertical cap: ", 344, 53, 344, 52, fastroute_->getEdgeCapacity(344, 53, true));
-  logger_->report("edge ({}, {}) -> ({}, {}) horizontal cap: ", 344, 53, 344, 52, fastroute_->getEdgeCapacity(344, 53, false));
+  logger_->report("edge ({}, {}) -> ({}, {}) vertical cap: {}", 344, 54, 344, 53, fastroute_->getEdgeCapacity(344, 54, true));
+  logger_->report("edge ({}, {}) -> ({}, {}) horizontal cap: {}", 344, 54, 344, 53, fastroute_->getEdgeCapacity(344, 54, false));
+  logger_->report("edge ({}, {}) -> ({}, {}) vertical cap: {}", 344, 53, 344, 52, fastroute_->getEdgeCapacity(344, 53, true));
+  logger_->report("edge ({}, {}) -> ({}, {}) horizontal cap: {}", 344, 53, 344, 52, fastroute_->getEdgeCapacity(344, 53, false));
   std::vector<int> track_space = grid_->getTrackPitches();
   fastroute_->initBlockedIntervals(track_space);
+  logger_->report("\mblocked adj: ");
+  logger_->report("edge ({}, {}) -> ({}, {}) vertical cap: {}", 344, 54, 344, 53, fastroute_->getEdgeCapacity(344, 54, true));
+  logger_->report("edge ({}, {}) -> ({}, {}) horizontal cap: {}", 344, 54, 344, 53, fastroute_->getEdgeCapacity(344, 54, false));
+  logger_->report("edge ({}, {}) -> ({}, {}) vertical cap: {}", 344, 53, 344, 52, fastroute_->getEdgeCapacity(344, 53, true));
+  logger_->report("edge ({}, {}) -> ({}, {}) horizontal cap: {}", 344, 53, 344, 52, fastroute_->getEdgeCapacity(344, 53, false));
   computeUserGlobalAdjustments(min_routing_layer, max_routing_layer);
+  logger_->report("\nuser gl adj: ");
+  logger_->report("edge ({}, {}) -> ({}, {}) vertical cap: {}", 344, 54, 344, 53, fastroute_->getEdgeCapacity(344, 54, true));
+  logger_->report("edge ({}, {}) -> ({}, {}) horizontal cap: {}", 344, 54, 344, 53, fastroute_->getEdgeCapacity(344, 54, false));
+  logger_->report("edge ({}, {}) -> ({}, {}) vertical cap: {}", 344, 53, 344, 52, fastroute_->getEdgeCapacity(344, 53, true));
+  logger_->report("edge ({}, {}) -> ({}, {}) horizontal cap: {}", 344, 53, 344, 52, fastroute_->getEdgeCapacity(344, 53, false));
   computeUserLayerAdjustments(max_routing_layer);
+  logger_->report("\nuser layer adj: ");
+  logger_->report("edge ({}, {}) -> ({}, {}) vertical cap: {}", 344, 54, 344, 53, fastroute_->getEdgeCapacity(344, 54, true));
+  logger_->report("edge ({}, {}) -> ({}, {}) horizontal cap: {}", 344, 54, 344, 53, fastroute_->getEdgeCapacity(344, 54, false));
+  logger_->report("edge ({}, {}) -> ({}, {}) vertical cap: {}", 344, 53, 344, 52, fastroute_->getEdgeCapacity(344, 53, true));
+  logger_->report("edge ({}, {}) -> ({}, {}) horizontal cap: {}", 344, 53, 344, 52, fastroute_->getEdgeCapacity(344, 53, false));
 
   computePinOffsetAdjustments();
+  logger_->report("\npin adj: ");
+  logger_->report("edge ({}, {}) -> ({}, {}) vertical cap: {}", 344, 54, 344, 53, fastroute_->getEdgeCapacity(344, 54, true));
+  logger_->report("edge ({}, {}) -> ({}, {}) horizontal cap: {}", 344, 54, 344, 53, fastroute_->getEdgeCapacity(344, 54, false));
+  logger_->report("edge ({}, {}) -> ({}, {}) vertical cap: {}", 344, 53, 344, 52, fastroute_->getEdgeCapacity(344, 53, true));
+  logger_->report("edge ({}, {}) -> ({}, {}) horizontal cap: {}", 344, 53, 344, 52, fastroute_->getEdgeCapacity(344, 53, false));
 
   for (RegionAdjustment region_adjustment : region_adjustments_) {
     odb::dbTechLayer* layer = routing_layers_[region_adjustment.getLayer()];
@@ -242,6 +262,11 @@ void GlobalRouter::applyAdjustments(int min_routing_layer,
                              region_adjustment.getLayer(),
                              region_adjustment.getAdjustment());
   }
+  logger_->report("\nregion adj: ");
+  logger_->report("edge ({}, {}) -> ({}, {}) vertical cap: {}", 344, 54, 344, 53, fastroute_->getEdgeCapacity(344, 54, true));
+  logger_->report("edge ({}, {}) -> ({}, {}) horizontal cap: {}", 344, 54, 344, 53, fastroute_->getEdgeCapacity(344, 54, false));
+  logger_->report("edge ({}, {}) -> ({}, {}) vertical cap: {}", 344, 53, 344, 52, fastroute_->getEdgeCapacity(344, 53, true));
+  logger_->report("edge ({}, {}) -> ({}, {}) horizontal cap: {}", 344, 53, 344, 52, fastroute_->getEdgeCapacity(344, 53, false));
   fastroute_->initAuxVar();
 }
 
