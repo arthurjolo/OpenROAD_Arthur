@@ -3268,7 +3268,6 @@ int GlobalRouter::findInstancesObstructions(
           applyObstructionAdjustment(cur_obs, tech->findRoutingLayer(layer));
         }
       }
-      return;
     } else {
       for (odb::dbBox* box : master->getObstructions()) {
         int layer = box->getTechLayer()->getRoutingLevel();
@@ -3291,40 +3290,41 @@ int GlobalRouter::findInstancesObstructions(
         }
       }
     }
+    if (!isMacro) {
+      for (odb::dbMTerm* mterm : master->getMTerms()) {
+        for (odb::dbMPin* mpin : mterm->getMPins()) {
+          odb::Point lower_bound;
+          odb::Point upper_bound;
+          odb::Rect pin_box;
+          int pin_layer;
 
-    for (odb::dbMTerm* mterm : master->getMTerms()) {
-      for (odb::dbMPin* mpin : mterm->getMPins()) {
-        odb::Point lower_bound;
-        odb::Point upper_bound;
-        odb::Rect pin_box;
-        int pin_layer;
+          for (odb::dbBox* box : mpin->getGeometry()) {
+            odb::Rect rect = box->getBox();
+            transform.apply(rect);
 
-        for (odb::dbBox* box : mpin->getGeometry()) {
-          odb::Rect rect = box->getBox();
-          transform.apply(rect);
-
-          odb::dbTechLayer* tech_layer = box->getTechLayer();
-          if (!tech_layer
-              || tech_layer->getType() != odb::dbTechLayerType::ROUTING) {
-            continue;
-          }
-
-          pin_layer = tech_layer->getRoutingLevel();
-          if (min_routing_layer_ <= pin_layer
-              && pin_layer <= max_routing_layer_) {
-            lower_bound = odb::Point(rect.xMin(), rect.yMin());
-            upper_bound = odb::Point(rect.xMax(), rect.yMax());
-            pin_box = odb::Rect(lower_bound, upper_bound);
-            if (!die_area.contains(pin_box)
-                && !mterm->getSigType().isSupply()) {
-              logger_->warn(GRT,
-                            39,
-                            "Found pin {} outside die area in instance {}.",
-                            mterm->getConstName(),
-                            inst->getConstName());
-              pin_out_of_die_count++;
+            odb::dbTechLayer* tech_layer = box->getTechLayer();
+            if (!tech_layer
+                || tech_layer->getType() != odb::dbTechLayerType::ROUTING) {
+              continue;
             }
-            applyObstructionAdjustment(pin_box, box->getTechLayer());
+
+            pin_layer = tech_layer->getRoutingLevel();
+            if (min_routing_layer_ <= pin_layer
+                && pin_layer <= max_routing_layer_) {
+              lower_bound = odb::Point(rect.xMin(), rect.yMin());
+              upper_bound = odb::Point(rect.xMax(), rect.yMax());
+              pin_box = odb::Rect(lower_bound, upper_bound);
+              if (!die_area.contains(pin_box)
+                  && !mterm->getSigType().isSupply()) {
+                logger_->warn(GRT,
+                              39,
+                              "Found pin {} outside die area in instance {}.",
+                              mterm->getConstName(),
+                              inst->getConstName());
+                pin_out_of_die_count++;
+              }
+              applyObstructionAdjustment(pin_box, box->getTechLayer());
+            }
           }
         }
       }
