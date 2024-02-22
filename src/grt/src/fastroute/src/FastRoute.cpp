@@ -1274,6 +1274,13 @@ NetRouteMap FastRouteCore::run()
     // generate DRC report each interval
     if (congestion_report_iter_step_ && i % congestion_report_iter_step_ == 0) {
       saveCongestion(i);
+      if (debug_->isOn() && debug_->tree2D_) {
+        for (int netID = 0; netID < netCount(); netID++) {
+          if (nets_[netID]->getDbNet() == debug_->net_ && !skipNet(netID)) {
+            StTreeVisualization(sttrees_[netID], nets_[netID], false);
+          }
+        }
+      }
     }
   }  // end overflow iterations
 

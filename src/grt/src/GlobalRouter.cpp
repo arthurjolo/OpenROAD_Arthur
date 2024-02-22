@@ -1140,6 +1140,9 @@ void GlobalRouter::computePinOffsetAdjustments()
                                                        gcell_id_x + i + 1,
                                                        gcell_id_y,
                                                        segment.init_layer);
+            if ((gcell_id_x + i == 344) && (gcell_id_y == 52)){
+              logger_->report("net {} passondo na gcell", net_route_fake_pins.first->getName());
+            }
             if (curr_cap == 0) {
               continue;
             }
@@ -1159,6 +1162,9 @@ void GlobalRouter::computePinOffsetAdjustments()
                                                        gcell_id_x,
                                                        gcell_id_y + i + 1,
                                                        segment.init_layer);
+            if ((gcell_id_x + i == 344) && (gcell_id_y == 52)) {
+              logger_->report("net {} passondo na gcell", net_route_fake_pins.first->getName());
+            }
             if (curr_cap == 0) {
               continue;
             }
