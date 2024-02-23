@@ -1134,15 +1134,12 @@ void GlobalRouter::computePinOffsetAdjustments()
           = floor((float) ((segment.init_y - die_area_min_y) / tile_size));
       if (!segment.isVia()) {
         if (segment.init_y == segment.final_y) {
-          for (int i = 0; i < gcells_offset_; i++) {
+          for (int i = 0; i < segment.final_x - segment.init_x; i++) {
             int curr_cap = fastroute_->getEdgeCapacity(gcell_id_x + i,
                                                        gcell_id_y,
                                                        gcell_id_x + i + 1,
                                                        gcell_id_y,
                                                        segment.init_layer);
-            if ((gcell_id_x + i == 344) && (gcell_id_y == 52)){
-              logger_->report("net {} passondo na gcell", net_route_fake_pins.first->getName());
-            }
             if (curr_cap == 0) {
               continue;
             }
@@ -1156,13 +1153,13 @@ void GlobalRouter::computePinOffsetAdjustments()
                                       true);
           }
         } else if (segment.init_x == segment.final_x) {
-          for (int i = 0; i < gcells_offset_; i++) {
+          for (int i = 0; i < segment.final_y - segment.init_y; i++) {
             int curr_cap = fastroute_->getEdgeCapacity(gcell_id_x,
                                                        gcell_id_y + i,
                                                        gcell_id_x,
                                                        gcell_id_y + i + 1,
                                                        segment.init_layer);
-            if ((gcell_id_x + i == 344) && (gcell_id_y == 52)) {
+            if ((gcell_id_x == 344) && (gcell_id_y + i == 52)) {
               logger_->report("net {} passondo na gcell", net_route_fake_pins.first->getName());
             }
             if (curr_cap == 0) {
@@ -3278,8 +3275,7 @@ int GlobalRouter::findInstancesObstructions(
           obstructions_cnt++;
         }
       }
-    }
-    //if (!isMacro) {
+
       for (odb::dbMTerm* mterm : master->getMTerms()) {
         for (odb::dbMPin* mpin : mterm->getMPins()) {
           odb::Point lower_bound;
@@ -3317,6 +3313,8 @@ int GlobalRouter::findInstancesObstructions(
           }
         }
       }
+    }
+    //if (!isMacro) {
     //}
   }
 
