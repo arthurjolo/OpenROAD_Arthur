@@ -2357,16 +2357,6 @@ void GlobalRouter::createFakePin(Pin pin,
   pin_connection.final_x = std::max(x_tmp, pin_connection.final_x);
   pin_connection.final_y = std::max(y_tmp, pin_connection.final_y);
 
-  // if there is already a pin with that fake position, don't add the gcell
-  // capacity adjustment.
-  auto& net_pad_pin_connection = pad_pins_connections_[net->getDbNet()];
-  if (std::find(net_pad_pin_connection.begin(),
-                net_pad_pin_connection.end(),
-                pin_connection)
-      != net_pad_pin_connection.end()) {
-    return;
-  }
-
   int pin_conn_init_x = pin_connection.init_x;
   int pin_conn_init_y = pin_connection.init_y;
 
@@ -2404,6 +2394,16 @@ void GlobalRouter::createFakePin(Pin pin,
         }
       }
     }
+  }
+
+  // if there is already a pin with that fake position, don't add the gcell
+  // capacity adjustment.
+  auto& net_pad_pin_connection = pad_pins_connections_[net->getDbNet()];
+  if (std::find(net_pad_pin_connection.begin(),
+                net_pad_pin_connection.end(),
+                pin_connection)
+      != net_pad_pin_connection.end()) {
+    return;
   }
 
   pad_pins_connections_[net->getDbNet()].push_back(pin_connection);
