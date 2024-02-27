@@ -2377,19 +2377,30 @@ void GlobalRouter::createFakePin(Pin pin,
     if (net_pin.getName() != pin.getName()
         && !(net_pin.isConnectedToPadOrMacro() || net_pin.isPort())) {
       auto net_pin_pos = net_pin.getOnGridPosition();
+      //if there is another pin on the same position of the real pin
+      //don't create the fake pin.
+      if (net_pin_pos.x() == original_x && net_pin_pos.y() == original_y) {
+        pin_position.setX(original_x);
+        pin_position.setY(original_y);
+        return;
+      }
+      //if there is annother pin between the created fake pin and the original pin, change
+      //the fake pin position to be the same as this other pin.
       if (pin_connection.init_y == pin_connection.final_y) {
-        if ((net_pin_pos.x() >= pin_conn_init_x)
-            && (net_pin_pos.x() <= pin_conn_final_x)
-            && (net_pin_pos.y() == pin_conn_init_y)) {
-          pin_position.setX(original_x);
-          return;
+        if ((net_pin_pos.y() == pin_conn_init_y) 
+            && (net_pin_pos.x() >= pin_conn_init_x)
+            && (net_pin_pos.x() <= pin_conn_final_x)) {
+          pin_position.setX(net_pin_pos.x());
+          pin_connection.init_x = std::min(original_x, net_pin_pos.x());
+          pin_connection.final_x = std::max(original_x, net_pin_pos.x());
         }
       } else {
-        if ((net_pin_pos.y() >= pin_conn_init_y)
-            && (net_pin_pos.y() <= pin_conn_final_y)
-            && (net_pin_pos.x() == pin_conn_init_x)) {
-          pin_position.setY(original_y);
-          return;
+        if ((net_pin_pos.x() == pin_conn_init_x) 
+            && (net_pin_pos.y() >= pin_conn_init_y)
+            && (net_pin_pos.y() <= pin_conn_final_y)) {
+          pin_position.setY(net_pin_pos.y());
+          pin_connection.init_y = std::min(original_y, net_pin_pos.y());
+          pin_connection.final_y = std::max(original_y, net_pin_pos.y());
         }
       }
     }
