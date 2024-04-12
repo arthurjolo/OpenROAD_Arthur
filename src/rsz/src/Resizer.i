@@ -256,6 +256,14 @@ layer_capacitance(odb::dbTechLayer *layer,
   return cap;
 }
 
+float
+report_nets_cap_cmd(odb::dbNet* net)
+{
+  ensureLinked();
+  Resizer *resizer = getResizer();
+  return resizer->report_nets_cap(net);
+}
+
 void
 set_h_wire_signal_rc_cmd(const Corner *corner,
                          float res,

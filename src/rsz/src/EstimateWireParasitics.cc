@@ -451,6 +451,16 @@ Resizer::estimateWireParasitic(const Net *net)
   }
 }
 
+float
+Resizer::report_nets_cap(dbNet* net)
+{
+  auto sta_net = db_network_->dbToSta(net);
+  float pin_cap, wire_cap = 0;
+  sta_->connectedCap(sta_net, sta_->cmdCorner(), sta::MinMax::max(), pin_cap, wire_cap);
+  logger_->report("{}", pin_cap + wire_cap);
+  return pin_cap + wire_cap;
+}
+
 void
 Resizer::estimateWireParasitic(const Pin *drvr_pin,
                                const Net *net)

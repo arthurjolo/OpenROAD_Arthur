@@ -8,10 +8,12 @@ read_sdc "critical_nets_percentage.sdc"
 
 source "sky130hs/sky130hs.rc"
 set_wire_rc -signal -layer "met2"
-set_wire_rc -clock  -layer "met5"
+set_wire_rc -clock  -layer "met4"
 
 set_propagated_clock [all_clocks]
 estimate_parasitics -placement
+
+report_nets_cap
 
 set guide_file [make_result_file critical_nets_percentage.guide]
 

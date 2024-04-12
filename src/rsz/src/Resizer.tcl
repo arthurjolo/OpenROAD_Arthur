@@ -124,6 +124,22 @@ proc set_layer_rc {args} {
   }
 }
 
+sta::define_cmd_args "report_nets_cap" {}
+
+proc report_nets_cap {} {
+  set db [ord::get_db]
+  set chip [$db getChip]
+  if { $chip == "NULL" } {
+    utl::error ODB 700 "please load the design before trying to use this command"
+  }
+  set block [$chip getBlock]
+  set nets [$block getNets]
+  foreach net $nets {
+    puts "[$net getName] [sta::format_time [rsz::report_nets_cap_cmd $net] 6]"
+  }
+  
+}
+
 sta::define_cmd_args "set_wire_rc" {[-clock] [-signal] [-data]\
                                       [-layers layers]\
                                       [-layer layer]\

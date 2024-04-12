@@ -214,6 +214,7 @@ public:
   double wireClkCapacitance(const Corner *corner) const;
   double wireClkHCapacitance(const Corner *corner) const;
   double wireClkVCapacitance(const Corner *corner) const;
+  float report_nets_cap(dbNet* net);
   void estimateParasitics(ParasiticsSrc src);
   void estimateWireParasitics();
   void estimateWireParasitic(const Net *net);
