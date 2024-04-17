@@ -7,8 +7,8 @@ read_def "critical_nets_percentage.def"
 read_sdc "critical_nets_percentage.sdc"
 
 source "sky130hs/sky130hs.rc"
-set_wire_rc -signal -layer "met2"
-set_wire_rc -clock  -layer "met4"
+set_wire_rc -signal -layers {"met2" "met3"}
+set_wire_rc -clock  -layers {"met4" "met5"}
 
 set_propagated_clock [all_clocks]
 estimate_parasitics -placement
@@ -21,6 +21,7 @@ set_routing_layers -signal met1-met5 -clock met3-met5
 set_global_routing_layer_adjustment met1-met5 0.8
 
 global_route -critical_nets_percentage 30 -verbose
+
 
 write_guides $guide_file
 

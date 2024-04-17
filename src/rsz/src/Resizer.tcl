@@ -135,7 +135,7 @@ proc report_nets_cap {} {
   set block [$chip getBlock]
   set nets [$block getNets]
   foreach net $nets {
-    puts "[$net getName] [sta::format_time [rsz::report_nets_cap_cmd $net] 6]"
+    puts "[$net getName]  [sta::format_time [rsz::report_nets_cap_cmd $net] 8]"
   }
   
 }
