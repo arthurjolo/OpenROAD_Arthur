@@ -1210,6 +1210,7 @@ void TritonCTS::writeClockNetsToDb(Clock& clockNet,
   numFixedNets_ = 0;
   ClockSubNet* rootSubNet = nullptr;
   std::set<ClockInst*> removedSinks;
+  std::vector<ClockSubNet> removedSubNets;
   clockNet.forEachSubNet([&](ClockSubNet& subNet) {
     bool outputPinFound = true;
     bool inputPinFound = true;
@@ -1232,7 +1233,12 @@ void TritonCTS::writeClockNetsToDb(Clock& clockNet,
     if (outputPinFound) {
       outputPin->connect(clkSubNet);
     }
-
+    /*
+      Due to the Htree builder nature we can create more subnets then needed to
+    cover all sinks, eg.: clock that connects to aonly 1 sink, Htree builder will
+    create 2 leaf clock nets when only 1 is enough. In the cases where a subnet
+    isn't connected to anything we delete it.
+    */
     if (subNet.getNumSinks() == 0) {
       inputPinFound = false;
     }
@@ -1274,9 +1280,16 @@ void TritonCTS::writeClockNetsToDb(Clock& clockNet,
       --numClkNets_;
       odb::dbInst::destroy(driver);
       removedSinks.insert(subNet.getDriver());
+      removedSubNets.push_back(subNet);
       checkUpstreamConnections(inputNet);
     }
   });
+
+  if(!removedSubNets.empty()) {
+    clockNet.forEachSubNet([&](ClockSubNet& subNet) {
+      subNet.removeSinks(removedSinks);
+    });
+  }
 
   if (!rootSubNet) {
     logger_->error(
@@ -1298,8 +1311,6 @@ void TritonCTS::writeClockNetsToDb(Clock& clockNet,
           maxPath = resultsForBranch.second;
         }
       }
-    } else {
-      rootSubNet->removeSinks(removedSinks);
     }
   });
 
