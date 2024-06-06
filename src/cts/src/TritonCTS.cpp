@@ -1281,15 +1281,11 @@ void TritonCTS::writeClockNetsToDb(Clock& clockNet,
       odb::dbInst::destroy(driver);
       removedSinks.insert(subNet.getDriver());
       removedSubNets.push_back(subNet);
+      subNet.removeSinks(removedSinks);
+      subNet.getParentSubNet()->removeSinks(removedSinks);
       checkUpstreamConnections(inputNet);
     }
   });
-
-  if(!removedSubNets.empty()) {
-    clockNet.forEachSubNet([&](ClockSubNet& subNet) {
-      subNet.removeSinks(removedSinks);
-    });
-  }
 
   if (!rootSubNet) {
     logger_->error(

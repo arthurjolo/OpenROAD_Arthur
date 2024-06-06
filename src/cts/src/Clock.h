@@ -123,12 +123,16 @@ class ClockSubNet
   std::deque<ClockInst*> instances_;
   std::unordered_map<ClockInst*, unsigned> mapInstToIdx_;
   bool leafLevel_ = false;
+  ClockSubNet* parent_ = nullptr;
 
  public:
   explicit ClockSubNet(const std::string& name) : name_(name) {}
 
   void setLeafLevel(bool isLeaf) { leafLevel_ = isLeaf; }
   bool isLeafLevel() const { return leafLevel_; }
+
+  void setParentSubNet(ClockSubNet* parent) { parent_ = parent; }
+  ClockSubNet* getParentSubNet() { return parent_; }
 
   void addInst(ClockInst& inst)
   {
