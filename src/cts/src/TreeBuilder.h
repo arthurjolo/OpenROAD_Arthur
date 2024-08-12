@@ -247,6 +247,8 @@ class TreeBuilder
   void setTopBufferDelay(float delay) { topBufferDelay_ = delay; }
   odb::dbInst* getTopBuffer() const { return topBuffer_; }
   void setTopBuffer(odb::dbInst* inst) { topBuffer_ = inst; }
+  odb::dbNet* getTopInputNet() const { return topInputNet_; }
+  void setTopInputNet(odb::dbNet* net) { topInputNet_ = net; }
 
  protected:
   CtsOptions* options_ = nullptr;
@@ -276,6 +278,7 @@ class TreeBuilder
   float aveArrival_ = 0.0;
   float topBufferDelay_ = 0.0;
   odb::dbInst* topBuffer_ = nullptr;
+  odb::dbNet* topInputNet_ = nullptr;
 };
 
 }  // namespace cts

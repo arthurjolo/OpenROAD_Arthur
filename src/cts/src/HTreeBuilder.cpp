@@ -1711,6 +1711,15 @@ void HTreeBuilder::refineBranchingPointsWithClustering(
   unsigned movedSinks = 0;
   const double errorFactor = 1.2;
   for (int clusterIdx = 0; clusterIdx < clusters.size(); ++clusterIdx) {
+    if(clusters[clusterIdx].size() == 0) {
+      logger_->report("-----------TEM UM COM 0 n level: {} -----------", level);
+      logger_->report("-----------Tinham {} sinks nesse level-----------", level);
+      if(clusterIdx == 1) {
+        logger_->report("O outro tem: {}", clusters[0].size());
+      } else {
+        logger_->report("O outro tem: {}", clusters[1].size());
+      }
+    }
     for (int elementIdx = 0; elementIdx < clusters[clusterIdx].size();
          ++elementIdx) {
       const unsigned sinkIdx = clusters[clusterIdx][elementIdx];
@@ -1778,8 +1787,7 @@ void HTreeBuilder::createClockSubNets()
                                              Point<double> branchPoint) {
     // If the branch point is a leaf and has no sinks that will be connected to
     // it don't create a clock sub net for it
-    if (topologyForEachLevel_.size() == 1
-        && topLevelTopology.getBranchSinksLocations(idx).empty()) {
+    if (topLevelTopology.getBranchSinksLocations(idx).empty()) {
       return;
     }
     Point<double> legalBranchPoint
@@ -1830,10 +1838,9 @@ void HTreeBuilder::createClockSubNets()
     isFirstPoint = true;
     topology.forEachBranchingPoint([&](unsigned idx,
                                        Point<double> branchPoint) {
-      // If the branch point is a leaf and has no sinks that will be connected
+      // If the branch point has no sinks that will be connected
       // to it don't create a clock sub net for it
-      if ((levelIdx == topologyForEachLevel_.size() - 1)
-          && topology.getBranchSinksLocations(idx).empty()) {
+      if (topology.getBranchSinksLocations(idx).empty()) {
         return;
       }
       unsigned parentIdx = topology.getBranchingPointParentIdx(idx);
