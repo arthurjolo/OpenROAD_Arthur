@@ -1377,8 +1377,7 @@ void TritonCTS::writeClockNDRsToDb(const std::set<odb::dbNet*>& clkLeafNets)
   int clkNets = 0;
   for (odb::dbNet* net : block_->getNets()) {
     if (net->getSigType() == odb::dbSigType::CLOCK
-        && (clkLeafNets.find(net) == clkLeafNets.end())
-        && (levelNets_.find(net) == levelNets_.end())) {
+        && (clkLeafNets.find(net) == clkLeafNets.end())) {
       net->setNonDefaultRule(clockNDR);
       clkNets++;
     }
