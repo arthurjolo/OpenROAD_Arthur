@@ -1214,6 +1214,7 @@ void TritonCTS::writeClockNetsToDb(Clock& clockNet,
     bool outputPinFound = true;
     bool inputPinFound = true;
     bool leafLevelNet = subNet.isLeafLevel();
+    bool isLevelNet = subNet.isLevel();
     if (("clknet_0_" + clockNet.getName()) == subNet.getName()) {
       rootSubNet = &subNet;
     }
@@ -1257,7 +1258,10 @@ void TritonCTS::writeClockNetsToDb(Clock& clockNet,
       }
     });
 
-    if (leafLevelNet) {
+    if (leafLevelNet || isLevelNet) {
+      if(subNet.getName() == "clknet_3_4_0_clk") {
+        logger_->report("leaf: {}, level: {}", leafLevelNet, isLevelNet);
+      }
       // Report fanout values only for sink nets
       if (fanoutcount.find(subNet.getNumSinks()) == fanoutcount.end()) {
         fanoutcount[subNet.getNumSinks()] = 0;
@@ -1372,7 +1376,8 @@ void TritonCTS::writeClockNDRsToDb(const std::set<odb::dbNet*>& clkLeafNets)
   int clkNets = 0;
   for (odb::dbNet* net : block_->getNets()) {
     if (net->getSigType() == odb::dbSigType::CLOCK
-        && (clkLeafNets.find(net) == clkLeafNets.end())) {
+        && (clkLeafNets.find(net) == clkLeafNets.end())
+        && (levelNets_.find(net) == levelNets_.end())) {
       net->setNonDefaultRule(clockNDR);
       clkNets++;
     }

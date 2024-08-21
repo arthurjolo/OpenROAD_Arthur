@@ -130,6 +130,7 @@ void LevelBalancer::addBufferLevels(TreeBuilder* builder,
     prevLevelSubNet->addInst(levelBuffer);
     levelSubNet->addInst(levelBuffer);
     prevLevelSubNet->setLeafLevel(false);
+    prevLevelSubNet->setIsLevel(true);
     prevLevelSubNet = levelSubNet;
   }
   // Add sinks to leaf buffer
@@ -137,6 +138,7 @@ void LevelBalancer::addBufferLevels(TreeBuilder* builder,
     prevLevelSubNet->addInst(*clockInstObj);
   }
   prevLevelSubNet->setLeafLevel(true);
+  prevLevelSubNet->setIsLevel(true);
 }
 
 void LevelBalancer::fixTreeLevels(TreeBuilder* builder,
@@ -178,6 +180,7 @@ void LevelBalancer::fixTreeLevels(TreeBuilder* builder,
     clusterCnt++;
     subNet.removeSinks(std::move(instsToRemove));
     subNet.setLeafLevel(false);
+    //subNet.setIsLevel(true);
     unsigned subClusterCnt = 0;
     for (const auto& cluster : subClusters) {
       const unsigned clusterLevel = cluster.first;

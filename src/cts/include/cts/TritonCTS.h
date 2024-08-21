@@ -220,6 +220,7 @@ class TritonCTS
   std::vector<TreeBuilder*>* builders_;
   std::set<odb::dbNet*> staClockNets_;
   std::set<odb::dbNet*> visitedClockNets_;
+  std::set<odb::dbNet*> levelNets_;
   std::map<odb::dbInst*, ClockInst*> inst2clkbuf_;
   std::map<ClockInst*, ClockSubNet*> driver2subnet_;
 
