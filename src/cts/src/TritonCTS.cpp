@@ -370,12 +370,13 @@ void TritonCTS::writeDataToDb()
 
   for (TreeBuilder* builder : *builders_) {
     writeClockNetsToDb(builder->getClock(), clkLeafNets);
-    if (options_->applyNDR()) {
-      writeClockNDRsToDb(clkLeafNets);
-    }
     if (options_->dummyLoadEnabled()) {
       writeDummyLoadsToDb(builder->getClock(), clkDummies);
     }
+  }
+
+  if (options_->applyNDR()) {
+    writeClockNDRsToDb(clkLeafNets);
   }
 
   for (TreeBuilder* builder : *builders_) {
