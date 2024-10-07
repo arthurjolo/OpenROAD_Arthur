@@ -155,7 +155,8 @@ bool TreeBuilder::findBlockage(const Point<double>& bufferLoc,
 // bufferName is a string that contains name of buffer master cell
 //
 Point<double> TreeBuilder::legalizeOneBuffer(Point<double> bufferLoc,
-                                             const std::string& bufferName)
+                                             const std::string& bufferName,
+                                             const std::vector<Point<double>>& sinks)
 {
   if (options_->getObstructionAware()) {
     odb::dbMaster* libCell = db_->findMaster(bufferName.c_str());
@@ -208,7 +209,7 @@ Point<double> TreeBuilder::legalizeOneBuffer(Point<double> bufferLoc,
 
       for (const Point<double>& candidate : candidates) {
         if (!isOccupiedLoc(candidate)) {
-          dist = computeDist(candidate, bufferLoc);
+          dist = weightedDist(candidate, bufferLoc, sinks);
           if (dist < minDist) {
             minDist = dist;
             bestLoc = candidate;
@@ -223,6 +224,17 @@ Point<double> TreeBuilder::legalizeOneBuffer(Point<double> bufferLoc,
   }
 
   return bufferLoc;
+}
+
+double TreeBuilder::weightedDist(const Point<double> candidate,
+                                 const Point<double> bufferLoc,
+                                 const std::vector<Point<double>>& sinks) {
+  double dist = 0.0;
+  dist += computeDist(candidate, bufferLoc);
+  for(const Point<double> sink : sinks) {
+    dist += computeDist(candidate, sink);
+  }
+  return dist;
 }
 
 // Check if a particular location is legal by checking

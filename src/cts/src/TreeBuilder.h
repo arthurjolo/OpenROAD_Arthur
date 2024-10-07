@@ -183,7 +183,11 @@ class TreeBuilder
                     double& x2,
                     double& y2);
   Point<double> legalizeOneBuffer(Point<double> bufferLoc,
-                                  const std::string& bufferName);
+                                  const std::string& bufferName,
+                                  const std::vector<Point<double>>& sinks);
+  double weightedDist(const Point<double> candidate,
+                      const Point<double> bufferLoc,
+                      const std::vector<Point<double>>& sinks);
   inline void addCandidatePoint(double x,
                                 double y,
                                 Point<double>& point,
