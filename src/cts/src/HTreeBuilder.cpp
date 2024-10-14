@@ -190,7 +190,7 @@ void HTreeBuilder::preSinkClustering(
     }
     if (cluster.size() > 1) {
       std::vector<ClockInst*> clusterClockInsts;  // sink clock insts
-      std::vector<Point<double>> clusterPoints;
+      std::vector<Point<double>> clusterSinkPoints;
       float xSum = 0;
       float ySum = 0;
       double insDelay = 0.0;
@@ -201,6 +201,7 @@ void HTreeBuilder::preSinkClustering(
         if (mapLocationToSink_.find(mapPoint) == mapLocationToSink_.end()) {
           logger_->error(CTS, 79, "Sink not found.");
         }
+        clusterSinkPoints.push_back(mapPoint);
         // add 4 points to account for insertion delay
         if (sinkHasInsertionDelay(mapPoint)) {
           insDelay = getSinkInsertionDelay(mapPoint);
@@ -225,7 +226,7 @@ void HTreeBuilder::preSinkClustering(
       const float normCenterY = (ySum / (float) pointCounter);
       Point<double> center((double) normCenterX, (double) normCenterY);
       Point<double> legalCenter
-          = legalizeOneBuffer(center, options_->getSinkBuffer(), clusterPoints);
+          = legalizeOneBuffer(center, options_->getSinkBuffer(), clusterSinkPoints);
       commitMoveLoc(center, legalCenter);
       const char* baseName = secondLevel ? "clkbuf_leaf2_" : "clkbuf_leaf_";
       ClockInst& rootBuffer
@@ -1795,7 +1796,9 @@ void HTreeBuilder::createClockSubNets()
       return;
     }
     Point<double> legalBranchPoint
-        = legalizeOneBuffer(branchPoint, options_->getRootBuffer(), topLevelTopology.getBranchSinksLocations(idx));
+        = legalizeOneBuffer(branchPoint,
+                            options_->getRootBuffer(),
+                            topLevelTopology.getBranchSinksLocations(idx));
     commitMoveLoc(branchPoint, legalBranchPoint);
 
     // clang-format off
@@ -1853,7 +1856,9 @@ void HTreeBuilder::createClockSubNets()
       Point<double> parentPoint = parentTopology.getBranchingPoint(parentIdx);
 
       Point<double> legalBranchPoint
-          = legalizeOneBuffer(branchPoint, options_->getRootBuffer(), topology.getBranchSinksLocations(idx));
+          = legalizeOneBuffer(branchPoint,
+                              options_->getRootBuffer(),
+                              topology.getBranchSinksLocations(idx));
       commitMoveLoc(branchPoint, legalBranchPoint);
 
       // clang-format off
