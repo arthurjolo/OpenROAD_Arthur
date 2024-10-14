@@ -90,9 +90,12 @@ void LevelBalancer::addBufferLevels(TreeBuilder* builder,
 
   // Compute driver, receiver locations
   double totalX = 0, totalY = 0;
+  std::vector<Point<double>> sinksPosition;
   for (ClockInst* clockInstObj : cluster) {
     totalX += clockInstObj->getX();
     totalY += clockInstObj->getY();
+    Point<double> sinkPoint(clockInstObj->getX() / wireSegmentUnit_, clockInstObj->getY() / wireSegmentUnit_);
+    sinksPosition.push_back(sinkPoint);
   }
   const double centroidX = totalX / cluster.size();
   const double centroidY = totalY / cluster.size();
@@ -111,7 +114,7 @@ void LevelBalancer::addBufferLevels(TreeBuilder* builder,
           / wireSegmentUnit_;
     Point<double> bufferLoc(x, y);
     Point<double> legalBufferLoc
-        = builder->legalizeOneBuffer(bufferLoc, options_->getSinkBuffer());
+        = builder->legalizeOneBuffer(bufferLoc, options_->getSinkBuffer(), sinksPosition);
     ClockInst& levelBuffer = builder->getClock().addClockBuffer(
         "clkbuf_level_" + std::to_string(level) + "_" + nameSuffix
             + std::to_string(levelBufCount_),

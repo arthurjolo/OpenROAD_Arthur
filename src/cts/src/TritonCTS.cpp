@@ -2279,7 +2279,7 @@ void TritonCTS::adjustLatencies(TreeBuilder* macroBuilder,
     double locY = (double) (sourceY + offsetY * (i + 1)) / scalingFactor;
     Point<double> bufferLoc(locX, locY);
     Point<double> legalBufferLoc
-        = builder->legalizeOneBuffer(bufferLoc, options_->getRootBuffer());
+        = builder->legalizeOneBuffer(bufferLoc, options_->getRootBuffer(), std::vector<Point<double>>());
     odb::dbInst* buffer
         = insertDelayBuffer(driver,
                             builder->getClock().getSdcName(),

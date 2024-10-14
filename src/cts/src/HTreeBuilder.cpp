@@ -190,12 +190,14 @@ void HTreeBuilder::preSinkClustering(
     }
     if (cluster.size() > 1) {
       std::vector<ClockInst*> clusterClockInsts;  // sink clock insts
+      std::vector<Point<double>> clusterPoints;
       float xSum = 0;
       float ySum = 0;
       double insDelay = 0.0;
       for (auto point_idx : cluster) {
         const std::pair<double, double>& point = points[point_idx];
         const Point<double> mapPoint(point.first, point.second);
+        clusterPoints.push_back(mapPoint);
         if (mapLocationToSink_.find(mapPoint) == mapLocationToSink_.end()) {
           logger_->error(CTS, 79, "Sink not found.");
         }
@@ -223,7 +225,7 @@ void HTreeBuilder::preSinkClustering(
       const float normCenterY = (ySum / (float) pointCounter);
       Point<double> center((double) normCenterX, (double) normCenterY);
       Point<double> legalCenter
-          = legalizeOneBuffer(center, options_->getSinkBuffer());
+          = legalizeOneBuffer(center, options_->getSinkBuffer(), clusterPoints);
       commitMoveLoc(center, legalCenter);
       const char* baseName = secondLevel ? "clkbuf_leaf2_" : "clkbuf_leaf_";
       ClockInst& rootBuffer
@@ -1022,7 +1024,7 @@ void HTreeBuilder::legalize()
   // make sure top level buffer is legal
   Point<double> oldTopBufferLoc = sinkRegion_.getCenter();
   Point<double> newTopBufferLoc
-      = legalizeOneBuffer(oldTopBufferLoc, options_->getRootBuffer());
+      = legalizeOneBuffer(oldTopBufferLoc, options_->getRootBuffer(), std::vector<Point<double>>());
   sinkRegion_.setCenter(newTopBufferLoc);
   commitMoveLoc(oldTopBufferLoc, newTopBufferLoc);
   // clang-format off
@@ -1758,7 +1760,7 @@ void HTreeBuilder::createClockSubNets()
 {
   Point<double> center = sinkRegion_.getCenter();
   Point<double> legalCenter
-      = legalizeOneBuffer(center, options_->getRootBuffer());
+      = legalizeOneBuffer(center, options_->getRootBuffer(), std::vector<Point<double>>());
   sinkRegion_.setCenter(legalCenter);
   commitMoveLoc(center, legalCenter);
   const int centerX = legalCenter.getX() * wireSegmentUnit_;
@@ -1793,7 +1795,7 @@ void HTreeBuilder::createClockSubNets()
       return;
     }
     Point<double> legalBranchPoint
-        = legalizeOneBuffer(branchPoint, options_->getRootBuffer());
+        = legalizeOneBuffer(branchPoint, options_->getRootBuffer(), topLevelTopology.getBranchSinksLocations(idx));
     commitMoveLoc(branchPoint, legalBranchPoint);
 
     // clang-format off
@@ -1814,6 +1816,7 @@ void HTreeBuilder::createClockSubNets()
                                          // sinkRegion_.getCenter()
                            legalBranchPoint,
                            topLevelTopology.getWireSegments(),
+                           topLevelTopology.getBranchSinksLocations(idx),
                            clock_,
                            rootClockSubNet,
                            *techChar_,
@@ -1850,7 +1853,7 @@ void HTreeBuilder::createClockSubNets()
       Point<double> parentPoint = parentTopology.getBranchingPoint(parentIdx);
 
       Point<double> legalBranchPoint
-          = legalizeOneBuffer(branchPoint, options_->getRootBuffer());
+          = legalizeOneBuffer(branchPoint, options_->getRootBuffer(), topology.getBranchSinksLocations(idx));
       commitMoveLoc(branchPoint, legalBranchPoint);
 
       // clang-format off
@@ -1874,6 +1877,7 @@ void HTreeBuilder::createClockSubNets()
                              parentPoint,
                              legalBranchPoint,
                              topology.getWireSegments(),
+                             topology.getBranchSinksLocations(idx),
                              clock_,
                              *parentTopology.getBranchDrivingSubNet(parentIdx),
                              *techChar_,
@@ -1930,7 +1934,7 @@ void HTreeBuilder::createSingleBufferClockNet()
 
   Point<double> center = sinkRegion_.getCenter();
   Point<double> legalCenter
-      = legalizeOneBuffer(center, options_->getRootBuffer());
+      = legalizeOneBuffer(center, options_->getRootBuffer(), std::vector<Point<double>>());
   sinkRegion_.setCenter(legalCenter);
   commitMoveLoc(center, legalCenter);
   const int centerX = legalCenter.getX() * wireSegmentUnit_;
@@ -2053,6 +2057,7 @@ SegmentBuilder::SegmentBuilder(const std::string& instPrefix,
                                const Point<double>& root,
                                const Point<double>& target,
                                const std::vector<unsigned>& techCharWires,
+                               const std::vector<Point<double>> sinksPosition,
                                Clock& clock,
                                ClockSubNet& drivingSubNet,
                                const TechChar& techChar,
@@ -2065,6 +2070,7 @@ SegmentBuilder::SegmentBuilder(const std::string& instPrefix,
       techCharWires_(techCharWires),
       techChar_(&techChar),
       techCharDistUnit_(techCharDistUnit),
+      sinksPosition_(sinksPosition),
       clock_(&clock),
       drivingSubNet_(&drivingSubNet),
       tree_(tree)
@@ -2103,7 +2109,7 @@ void SegmentBuilder::build(const std::string& forceBuffer)
                                          : wireSegment.getBufferMaster(buffer);
       Point<double> bufferLoc(x, y);
       Point<double> legalBufferLoc
-          = tree_->legalizeOneBuffer(bufferLoc, buffMaster);
+          = tree_->legalizeOneBuffer(bufferLoc, buffMaster, sinksPosition_);
       tree_->commitMoveLoc(bufferLoc, legalBufferLoc);
       ClockInst& newBuffer = clock_->addClockBuffer(
           instPrefix_ + std::to_string(numBufferLevels_),

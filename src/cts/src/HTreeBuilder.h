@@ -53,6 +53,7 @@ class SegmentBuilder
                  const Point<double>& root,
                  const Point<double>& target,
                  const std::vector<unsigned>& techCharWires,
+                 const std::vector<Point<double>> sinksPosition,
                  Clock& clock,
                  ClockSubNet& drivingSubNet,
                  const TechChar& techChar,
@@ -72,6 +73,7 @@ class SegmentBuilder
   const Point<double> root_;
   const Point<double> target_;
   const std::vector<unsigned> techCharWires_;
+  const std::vector<Point<double>> sinksPosition_;
   const TechChar* techChar_;
   const unsigned techCharDistUnit_;
   Clock* clock_;
