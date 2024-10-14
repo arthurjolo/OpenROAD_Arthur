@@ -197,7 +197,6 @@ void HTreeBuilder::preSinkClustering(
       for (auto point_idx : cluster) {
         const std::pair<double, double>& point = points[point_idx];
         const Point<double> mapPoint(point.first, point.second);
-        clusterPoints.push_back(mapPoint);
         if (mapLocationToSink_.find(mapPoint) == mapLocationToSink_.end()) {
           logger_->error(CTS, 79, "Sink not found.");
         }
