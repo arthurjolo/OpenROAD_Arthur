@@ -1149,39 +1149,43 @@ void HTreeBuilder::run()
 
   initSinkRegion();
 
-  for (int level = 1; level <= clockTreeMaxDepth_; ++level) {
-    const unsigned numSinksPerSubRegion
-        = computeNumberOfSinksPerSubRegion(level);
-    double regionWidth, regionHeight;
-    computeSubRegionSize(level, regionWidth, regionHeight);
+  const unsigned numSinksOn0
+        = computeNumberOfSinksPerSubRegion(0);
 
-    if (isSubRegionTooSmall(regionWidth, regionHeight)) {
-      if (options_->isFakeLutEntriesEnabled()) {
-        const unsigned minIndex = 1;
-        techChar_->createFakeEntries(minLengthSinkRegion_, minIndex);
-        minLengthSinkRegion_ = 1;
-      } else {
-        logger_->info(
-            CTS,
-            31,
-            " Stop criterion found. Min length of sink region is ({}).",
-            minLengthSinkRegion_);
+  if(!isNumberOfSinksTooSmall(numSinksOn0)) {
+    for (int level = 1; level <= clockTreeMaxDepth_; ++level) {
+      const unsigned numSinksPerSubRegion
+          = computeNumberOfSinksPerSubRegion(level);
+      double regionWidth, regionHeight;
+      computeSubRegionSize(level, regionWidth, regionHeight);
+
+      if (isSubRegionTooSmall(regionWidth, regionHeight)) {
+        if (options_->isFakeLutEntriesEnabled()) {
+          const unsigned minIndex = 1;
+          techChar_->createFakeEntries(minLengthSinkRegion_, minIndex);
+          minLengthSinkRegion_ = 1;
+        } else {
+          logger_->info(
+              CTS,
+              31,
+              " Stop criterion found. Min length of sink region is ({}).",
+              minLengthSinkRegion_);
+          break;
+        }
+      }
+
+      computeLevelTopology(level, regionWidth, regionHeight);
+
+      if (isNumberOfSinksTooSmall(numSinksPerSubRegion)) {
+        logger_->info(CTS,
+                      32,
+                      " Stop criterion found. Max number of sinks is {}.",
+                      options_->getMaxFanout() ? options_->getMaxFanout()
+                                              : numMaxLeafSinks_);
         break;
       }
     }
-
-    computeLevelTopology(level, regionWidth, regionHeight);
-
-    if (isNumberOfSinksTooSmall(numSinksPerSubRegion)) {
-      logger_->info(CTS,
-                    32,
-                    " Stop criterion found. Max number of sinks is {}.",
-                    options_->getMaxFanout() ? options_->getMaxFanout()
-                                             : numMaxLeafSinks_);
-      break;
-    }
   }
-
   if (topologyForEachLevel_.empty()) {
     createSingleBufferClockNet();
     treeBufLevels_++;
