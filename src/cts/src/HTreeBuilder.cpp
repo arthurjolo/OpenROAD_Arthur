@@ -1149,10 +1149,10 @@ void HTreeBuilder::run()
 
   initSinkRegion();
 
-  const unsigned numSinksOn0
+  const unsigned numSinksLevel0
         = computeNumberOfSinksPerSubRegion(0);
 
-  if(!isNumberOfSinksTooSmall(numSinksOn0)) {
+  if(!isNumberOfSinksTooSmall(numSinksLevel0)) {
     for (int level = 1; level <= clockTreeMaxDepth_; ++level) {
       const unsigned numSinksPerSubRegion
           = computeNumberOfSinksPerSubRegion(level);
@@ -1186,6 +1186,7 @@ void HTreeBuilder::run()
       }
     }
   }
+
   if (topologyForEachLevel_.empty()) {
     createSingleBufferClockNet();
     treeBufLevels_++;
