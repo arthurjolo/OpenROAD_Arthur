@@ -40,6 +40,7 @@
 #include <fstream>
 #include <iostream>
 #include <map>
+#include <sstream>
 #include <string>
 #include <tuple>
 #include <vector>
@@ -309,9 +310,9 @@ bool SinkClustering::findBestMatching(const unsigned groupSize)
         // Add vectors in case they are no allocated yet. (Depends if a new
         // cluster was defined above)
         if (solutions[j].size() < (clusters[j] + 1)) {
-          solutions[j].push_back({});
-          solutionPoints[j].push_back({});
-          solutionPointsIdx[j].push_back({});
+          solutions[j].emplace_back();
+          solutionPoints[j].emplace_back();
+          solutionPointsIdx[j].emplace_back();
         }
         // Save the current Point in it's respective cluster. (Depends if a new
         // cluster was defined above)
@@ -328,9 +329,9 @@ bool SinkClustering::findBestMatching(const unsigned groupSize)
     // one late).
     for (unsigned j = (i + 1); j < groupSize; ++j) {
       if (solutions[j].size() < (clusters[j] + 1)) {
-        solutions[j].push_back({});
-        solutionPoints[j].push_back({});
-        solutionPointsIdx[j].push_back({});
+        solutions[j].emplace_back();
+        solutionPoints[j].emplace_back();
+        solutionPointsIdx[j].emplace_back();
       }
       // Thus here we will assign the Points missing from those solutions.
       const unsigned idx = thetaIndexVector_[i].second;
@@ -374,9 +375,9 @@ bool SinkClustering::findBestMatching(const unsigned groupSize)
         }
       }
       if (solutions[j].size() < (clusters[j] + 1)) {
-        solutions[j].push_back({});
-        solutionPoints[j].push_back({});
-        solutionPointsIdx[j].push_back({});
+        solutions[j].emplace_back();
+        solutionPoints[j].emplace_back();
+        solutionPointsIdx[j].emplace_back();
       }
       solutionPoints[j][clusters[j]].push_back(p);
       solutionPointsIdx[j][clusters[j]].push_back(idx);
@@ -419,11 +420,12 @@ bool SinkClustering::findBestMatching(const unsigned groupSize)
   if (logger_->debugCheck(CTS, "clustering", 2)) {
     size_t solnIndex = 0;
     for (const std::vector<unsigned>& soln : bestSolution_) {
-      std::cout << "Solution " << solnIndex << "[" << soln.size() << "]: ";
+      std::ostringstream s;
+      s << "Solution " << solnIndex << "[" << soln.size() << "]: ";
       for (const unsigned i : soln) {
-        std::cout << i << " ";
+        s << i << " ";
       }
-      std::cout << std::endl;
+      logger_->debug(CTS, "clustering", "{}", s.str());
       ++solnIndex;
     }
   }
