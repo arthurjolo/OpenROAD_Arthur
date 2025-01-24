@@ -332,7 +332,10 @@ void HTreeBuilder::initSinkRegion()
   // clang-format on
 
   preSinkClustering(topLevelSinks, sinkInsts, maxDiameter, clusterSize);
-  if (topLevelSinks.size() <= min_clustering_sinks_
+  unsigned min_clustering_sinks = (type_ == TreeType::MacroTree)
+                                      ? min_clustering_macro_sinks_
+                                      : min_clustering_sinks_;
+  if (topLevelSinks.size() <= min_clustering_sinks
       || !(options_->getSinkClustering())) {
     Box<int> sinkRegionDbu = clock_.computeSinkRegion();
     logger_->info(CTS, 23, " Original sink region: {}.", sinkRegionDbu);
@@ -1302,7 +1305,10 @@ unsigned HTreeBuilder::computeNumberOfSinksPerSubRegion(
     const unsigned level) const
 {
   unsigned totalNumSinks = 0;
-  if (clock_.getNumSinks() > min_clustering_sinks_
+  unsigned min_clustering_sinks = (type_ == TreeType::MacroTree)
+                                      ? min_clustering_macro_sinks_
+                                      : min_clustering_sinks_; 
+  if (clock_.getNumSinks() > min_clustering_sinks
       && options_->getSinkClustering()) {
     totalNumSinks = topLevelSinksClustered_.size();
   } else {
