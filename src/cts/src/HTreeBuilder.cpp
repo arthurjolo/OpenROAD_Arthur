@@ -91,6 +91,8 @@ void HTreeBuilder::preSinkClustering(
     return;
   }
 
+  logger_->report("Db units: {}, wiresegment: {}", options_->getDbUnits(), wireSegmentUnit_);
+
   SinkClustering matching(options_, techChar_, this);
   const unsigned numPoints = points.size();
 
@@ -104,7 +106,35 @@ void HTreeBuilder::preSinkClustering(
       matching.addCap(sinkInsts[pointIdx]->getInputCap());
     }
   }
+  int no_clustering_cost = 0;
+  if(type_ == TreeType::MacroTree) {
+    clock_.forEachSink([&](ClockInst& inst) {
+      auto db_iterm = inst.getDbInputPin();
+      auto db_inst = db_iterm->getInst();
+      auto db_inst_bbox = db_inst->getBBox();
+      int db_inst_center_x = (db_inst_bbox->xMax() + db_inst_bbox->xMin()) / 2;
+      int db_inst_center_y = (db_inst_bbox->yMax() + db_inst_bbox->yMin()) / 2;
+      int db_iterm_x, db_iterm_y;
+      db_iterm->getAvgXY(&db_iterm_x, &db_iterm_y);
+      /*if(!cont) {
+        logger_->report("!!!!! Checking inst: {}!!!!!", db_inst->getName());
+        logger_->report("  BBox: ({}, {}) -> ({}, {})", db_inst_bbox->xMin(),
+                                                        db_inst_bbox->yMin(),
+                                                        db_inst_bbox->xMax(),
+                                                        db_inst_bbox->yMax()) ;
+        logger_->report("  BBox center: ({}, {})", db_inst_center_x,
+                                                   db_inst_center_y);
+        logger_->report("  Iterm:       ({}, {})", db_iterm_x,
+                                                   db_iterm_y);
+        logger_->report("  Dist_x:      {}", std::abs(db_inst_center_x - db_iterm_x));
+        logger_->report("  Dist_y:      {}", std::abs(db_inst_center_y - db_iterm_y));
+      }*/
+      no_clustering_cost += std::abs(db_inst_center_x - db_iterm_x);
+      no_clustering_cost += std::abs(db_inst_center_y - db_iterm_y);
+    });
 
+    logger_->report("No clustering cost for macros: {}", no_clustering_cost);
+  }
   unsigned bestClusterSize = 0;
   float bestDiameter = 0.0;
   if (clusterSizeSet && maxDiameterSet) {
@@ -191,6 +221,7 @@ void HTreeBuilder::preSinkClustering(
   unsigned clusterCount = 0;
 
   std::vector<std::pair<float, float>> newSinkLocations;
+  int clustered_cost = 0;
   for (const std::vector<unsigned>& cluster :
        matching.sinkClusteringSolution()) {
     if (cluster.size() == 1) {
@@ -258,6 +289,10 @@ void HTreeBuilder::preSinkClustering(
       // Subnet that connects the new -sink- buffer to each specific sink
       clockSubNet.addInst(rootBuffer);
       for (ClockInst* clockInstObj : clusterClockInsts) {
+        if(type_ == TreeType::MacroTree) {
+          clustered_cost += std::abs(rootBuffer.getX() - clockInstObj->getX());
+          clustered_cost += std::abs(rootBuffer.getY() - clockInstObj->getY());
+        }
         clockSubNet.addInst(*clockInstObj);
       }
       if (!secondLevel) {
@@ -269,6 +304,9 @@ void HTreeBuilder::preSinkClustering(
       mapLocationToSink_[newSinkPos] = &rootBuffer;
     }
     clusterCount++;
+  }
+  if(type_ == TreeType::MacroTree) {
+    logger_->report("Clustered cos: {}", clustered_cost);
   }
   topLevelSinksClustered_ = std::move(newSinkLocations);
   if (clusterCount) {
