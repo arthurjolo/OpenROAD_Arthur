@@ -227,12 +227,12 @@ class TritonCTS
                                  int locX,
                                  int locY);
 
-  sta::dbSta* openSta_;
-  sta::dbNetwork* network_;
-  Logger* logger_;
-  CtsOptions* options_;
+  sta::dbSta* openSta_ = nullptr;
+  sta::dbNetwork* network_ = nullptr;
+  Logger* logger_ = nullptr;
+  CtsOptions* options_ = nullptr;
   std::unique_ptr<TechChar> techChar_;
-  rsz::Resizer* resizer_;
+  rsz::Resizer* resizer_ = nullptr;
   std::vector<std::unique_ptr<TreeBuilder>> builders_;
   std::set<odb::dbNet*> staClockNets_;
   std::set<odb::dbNet*> visitedClockNets_;
@@ -240,7 +240,7 @@ class TritonCTS
   std::map<ClockInst*, ClockSubNet*> driver2subnet_;
 
   // db vars
-  odb::dbDatabase* db_;
+  odb::dbDatabase* db_ = nullptr;
   odb::dbBlock* block_ = nullptr;
   unsigned numberOfClocks_ = 0;
   unsigned numClkNets_ = 0;

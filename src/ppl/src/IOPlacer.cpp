@@ -889,7 +889,7 @@ void IOPlacer::findSlots(const std::set<int>& layers, Edge edge)
                        : core_->getNumTracksY().at(layer);
 
     std::vector<Point> slots;
-    int min_dst_pins;
+    int min_dst_pins = 0;
     for (int l = 0; l < layer_min_distances.size(); l++) {
       int curr_x, curr_y, start_idx, end_idx;
       int tech_min_dst = layer_min_distances[l];
@@ -924,7 +924,8 @@ void IOPlacer::findSlots(const std::set<int>& layers, Edge edge)
 
       half_width *= thickness_multiplier;
 
-      int num_tracks_offset = std::ceil(corner_avoidance_ / min_dst_pins);
+      int num_tracks_offset
+          = std::ceil(static_cast<double>(corner_avoidance_) / min_dst_pins);
 
       start_idx
           = std::max(0.0,
@@ -964,19 +965,27 @@ void IOPlacer::findSlots(const std::set<int>& layers, Edge edge)
                 return p1.getY() < p2.getY();
               });
 
+    // Remove slots that violates the min distance before reversing the vector.
+    // This ensures that mirrored positions will exists for every slot.
+    Point last = slots[0];
+    for (auto it = slots.begin(); it != slots.end();) {
+      Point pos = *it;
+      if (pos != last && std::abs(last.getX() - pos.getX()) < min_dst_pins
+          && std::abs(last.getY() - pos.getY()) < min_dst_pins) {
+        it = slots.erase(it);
+      } else {
+        last = pos;
+        ++it;
+      }
+    }
+
     if (edge == Edge::top || edge == Edge::left) {
       std::reverse(slots.begin(), slots.end());
     }
 
-    Point last_pos = slots[0];
     for (const Point& pos : slots) {
       bool blocked = checkBlocked(edge, pos, layer);
-      if (pos == last_pos
-          || std::abs(last_pos.getX() - pos.getX()) >= min_dst_pins
-          || std::abs(last_pos.getY() - pos.getY()) >= min_dst_pins) {
-        slots_.push_back({blocked, false, pos, layer, edge});
-        last_pos = pos;
-      }
+      slots_.push_back({blocked, false, pos, layer, edge});
     }
   }
 }
@@ -2734,17 +2743,17 @@ void IOPlacer::initCore(const std::set<int>& hor_layer_idxs,
     min_area_y = hor_layer->getArea() * database_unit * database_unit;
     min_width_y = hor_layer->getWidth();
 
-    min_spacings_y[hor_layer_idx] = min_spacing_y;
-    init_tracks_y[hor_layer_idx] = init_track_y;
+    min_spacings_y[hor_layer_idx] = std::move(min_spacing_y);
+    init_tracks_y[hor_layer_idx] = std::move(init_track_y);
     min_areas_y[hor_layer_idx] = min_area_y;
     min_widths_y[hor_layer_idx] = min_width_y;
-    num_tracks_y[hor_layer_idx] = num_track_y;
+    num_tracks_y[hor_layer_idx] = std::move(num_track_y);
   }
 
   for (int ver_layer_idx : ver_layer_idxs) {
     odb::dbTechLayer* ver_layer = getTech()->findRoutingLayer(ver_layer_idx);
     odb::dbTrackGrid* ver_track_grid = getBlock()->findTrackGrid(ver_layer);
-    const int track_patterns_count = ver_track_grid->getNumGridPatternsY();
+    const int track_patterns_count = ver_track_grid->getNumGridPatternsX();
 
     std::vector<int> init_track_x(track_patterns_count, 0);
     std::vector<int> num_track_x(track_patterns_count, 0);
@@ -2760,11 +2769,11 @@ void IOPlacer::initCore(const std::set<int>& hor_layer_idxs,
     min_area_x = ver_layer->getArea() * database_unit * database_unit;
     min_width_x = ver_layer->getWidth();
 
-    min_spacings_x[ver_layer_idx] = min_spacing_x;
-    init_tracks_x[ver_layer_idx] = init_track_x;
+    min_spacings_x[ver_layer_idx] = std::move(min_spacing_x);
+    init_tracks_x[ver_layer_idx] = std::move(init_track_x);
     min_areas_x[ver_layer_idx] = min_area_x;
     min_widths_x[ver_layer_idx] = min_width_x;
-    num_tracks_x[ver_layer_idx] = num_track_x;
+    num_tracks_x[ver_layer_idx] = std::move(num_track_x);
   }
 
   *core_ = Core(boundary,

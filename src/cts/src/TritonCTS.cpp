@@ -940,7 +940,7 @@ void TritonCTS::populateTritonCTS()
       // Since a set is unique, only the nets not found by dbSta are added.
       clockNets.insert(net);
     }
-    clockNetsInfo.emplace_back(std::make_pair(clockNets, std::string("")));
+    clockNetsInfo.emplace_back(clockNets, "");
   } else {
     std::set<odb::dbNet*> allClkNets;
     staClockNets_ = openSta_->findClkNets();
@@ -955,7 +955,7 @@ void TritonCTS::populateTritonCTS()
               CTS, 114, "Clock {} overlaps a previous clock.", clkName);
         }
       }
-      clockNetsInfo.emplace_back(std::make_pair(clkNets, clkName));
+      clockNetsInfo.emplace_back(clkNets, clkName);
       allClkNets.insert(clkNets.begin(), clkNets.end());
     }
   }
@@ -1150,7 +1150,7 @@ TreeBuilder* TritonCTS::initClockTreeForMacrosAndRegs(
                       "registers");
   if (secondBuilder) {
     secondBuilder->setTreeType(TreeType::RegisterTree);
-    secondBuilder->setTopBufferName(topBufferName);
+    secondBuilder->setTopBufferName(std::move(topBufferName));
     secondBuilder->setDrivingNet(firstNet);
     secondBuilder->setTopInputNet(clkInputNet);
   }
