@@ -128,6 +128,7 @@ class Grid
 
   GridX gridPaddedWidth(const Cell* cell) const;
   GridY gridHeight(const Cell* cell) const;
+  GridY gridHeight(odb::dbMaster* master) const;
   DbuY rowHeight(GridY index);
   void setGridPaddedLoc(Cell* cell, GridX x, GridY y) const;
 
@@ -138,7 +139,6 @@ class Grid
                        const std::function<void(Pixel* pixel)>& visitor) const;
   void visitCellBoundaryPixels(
       Cell& cell,
-      bool padded,
       const std::function<
           void(Pixel* pixel, odb::Direction2D edge, GridX x, GridY y)>& visitor)
       const;
