@@ -1205,12 +1205,14 @@ void HTreeBuilder::run()
 
   const unsigned numSinksOn0
         = computeNumberOfSinksPerSubRegion(0);
+  double regionWidth, regionHeight;
+        computeSubRegionSize(0, regionWidth, regionHeight);
 
-  if((options_->getMaxFanout() && !isNumberOfSinksTooSmall(numSinksOn0)) || (!options_->getMaxFanout() && !isSubRegionTooSmall(numSinksOn0))) {
+  if((options_->getMaxFanout() && !isNumberOfSinksTooSmall(numSinksOn0)) || (!options_->getMaxFanout() && !isSubRegionTooSmall(regionWidth, regionHeight))) {
     for (int level = 1; level <= clockTreeMaxDepth_; ++level) {
       const unsigned numSinksPerSubRegion
           = computeNumberOfSinksPerSubRegion(level);
-      double regionWidth, regionHeight;
+
       computeSubRegionSize(level, regionWidth, regionHeight);
 
       if (isSubRegionTooSmall(regionWidth, regionHeight)) {
