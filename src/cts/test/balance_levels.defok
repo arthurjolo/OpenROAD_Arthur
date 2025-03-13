@@ -4,12 +4,11 @@ BUSBITCHARS "[]" ;
 DESIGN multi_sink ;
 UNITS DISTANCE MICRONS 2000 ;
 DIEAREA ( 0 0 ) ( 200000 200000 ) ;
-COMPONENTS 368 ;
+COMPONENTS 367 ;
     - CELL/CKGATE BUF_X1 + PLACED ( 100000 100000 ) N ;
     - clkbuf_0_CELL\/clk2 CLKBUF_X3 + SOURCE TIMING + PLACED ( 103228 140117 ) N ;
     - clkbuf_0_clk CLKBUF_X3 + SOURCE TIMING + PLACED ( 100250 101225 ) N ;
     - clkbuf_0_clk_regs CLKBUF_X3 + SOURCE TIMING + PLACED ( 103228 51229 ) N ;
-    - clkbuf_1_0__f_clk CLKBUF_X3 + SOURCE TIMING + PLACED ( 100250 87225 ) N ;
     - clkbuf_4_0__f_CELL\/clk2 CLKBUF_X3 + SOURCE TIMING + PLACED ( 35318 119627 ) N ;
     - clkbuf_4_0__f_clk_regs CLKBUF_X3 + SOURCE TIMING + PLACED ( 37181 26644 ) N ;
     - clkbuf_4_10__f_CELL\/clk2 CLKBUF_X3 + SOURCE TIMING + PLACED ( 169474 113337 ) N ;
@@ -380,18 +379,17 @@ PINS 1 ;
         + LAYER metal6 ( -140 -140 ) ( 140 140 )
         + FIXED ( 100000 199860 ) N ;
 END PINS
-NETS 39 ;
+NETS 38 ;
     - CELL/clk2 ( clkbuf_0_CELL\/clk2 A ) ( CELL/CKGATE Z ) + USE CLOCK ;
     - clk ( PIN clk ) ( clkbuf_regs_0_clk A ) ( clkbuf_0_clk A ) + USE CLOCK ;
     - clk_regs ( clkbuf_regs_0_clk Z ) ( clkbuf_0_clk_regs A ) + USE CLOCK ;
     - clknet_0_CELL\/clk2 ( clkbuf_4_15__f_CELL\/clk2 A ) ( clkbuf_4_14__f_CELL\/clk2 A ) ( clkbuf_4_13__f_CELL\/clk2 A ) ( clkbuf_4_12__f_CELL\/clk2 A ) ( clkbuf_4_11__f_CELL\/clk2 A ) ( clkbuf_4_10__f_CELL\/clk2 A ) ( clkbuf_4_9__f_CELL\/clk2 A )
       ( clkbuf_4_8__f_CELL\/clk2 A ) ( clkbuf_4_7__f_CELL\/clk2 A ) ( clkbuf_4_6__f_CELL\/clk2 A ) ( clkbuf_4_5__f_CELL\/clk2 A ) ( clkbuf_4_4__f_CELL\/clk2 A ) ( clkbuf_4_3__f_CELL\/clk2 A ) ( clkbuf_4_2__f_CELL\/clk2 A ) ( clkbuf_4_1__f_CELL\/clk2 A )
       ( clkbuf_4_0__f_CELL\/clk2 A ) ( clkbuf_0_CELL\/clk2 Z ) + USE CLOCK ;
-    - clknet_0_clk ( clkbuf_1_0__f_clk A ) ( clkbuf_0_clk Z ) + USE CLOCK ;
+    - clknet_0_clk ( CELL/CKGATE A ) ( clkbuf_0_clk Z ) + USE CLOCK ;
     - clknet_0_clk_regs ( clkbuf_4_15__f_clk_regs A ) ( clkbuf_4_14__f_clk_regs A ) ( clkbuf_4_13__f_clk_regs A ) ( clkbuf_4_12__f_clk_regs A ) ( clkbuf_4_11__f_clk_regs A ) ( clkbuf_4_10__f_clk_regs A ) ( clkbuf_4_9__f_clk_regs A )
       ( clkbuf_4_8__f_clk_regs A ) ( clkbuf_4_7__f_clk_regs A ) ( clkbuf_4_6__f_clk_regs A ) ( clkbuf_4_5__f_clk_regs A ) ( clkbuf_4_4__f_clk_regs A ) ( clkbuf_4_3__f_clk_regs A ) ( clkbuf_4_2__f_clk_regs A ) ( clkbuf_4_1__f_clk_regs A )
       ( clkbuf_4_0__f_clk_regs A ) ( clkbuf_0_clk_regs Z ) + USE CLOCK ;
-    - clknet_1_0__leaf_clk ( CELL/CKGATE A ) ( clkbuf_1_0__f_clk Z ) + USE CLOCK ;
     - clknet_4_0__leaf_CELL\/clk2 ( clkload15 A ) ( ff162 CK ) ( ff163 CK ) ( ff164 CK ) ( ff165 CK ) ( ff180 CK ) ( ff181 CK )
       ( ff182 CK ) ( ff183 CK ) ( ff184 CK ) ( clkbuf_4_0__f_CELL\/clk2 Z ) + USE CLOCK ;
     - clknet_4_0__leaf_clk_regs ( clkload0 A ) ( ff0 CK ) ( ff1 CK ) ( ff2 CK ) ( ff3 CK ) ( ff18 CK ) ( ff19 CK )

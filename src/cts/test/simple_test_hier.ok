@@ -52,24 +52,18 @@ delta HPWL                    0 %
 [INFO CTS-0024]  Normalized sink region: [(0.230714, 0.0878571), (1.615, 1.28786)].
 [INFO CTS-0025]     Width:  1.3843.
 [INFO CTS-0026]     Height: 1.2000.
- Level 1
-    Direction: Horizontal
-    Sinks per sub-region: 8
-    Sub-region size: 0.6921 X 1.2000
-[INFO CTS-0034]     Segment length (rounded): 1.
-[INFO CTS-0032]  Stop criterion found. Max number of sinks is 15.
-[INFO CTS-0035]  Number of sinks covered: 16.
-[INFO CTS-0018]     Created 3 clock buffers.
-[INFO CTS-0012]     Minimum number of buffers in the clock path: 2.
-[INFO CTS-0013]     Maximum number of buffers in the clock path: 2.
-[INFO CTS-0015]     Created 3 clock nets.
-[INFO CTS-0016]     Fanout distribution for the current clock = 7:1, 9:1..
-[INFO CTS-0017]     Max level of the clock tree: 1.
-[INFO CTS-0202] Non-default rule CTS_NDR_0 for double spacing has been applied to 2 clock nets
+ Building single-buffer clock net.
+[INFO CTS-0018]     Created 1 clock buffers.
+[INFO CTS-0012]     Minimum number of buffers in the clock path: 1.
+[INFO CTS-0013]     Maximum number of buffers in the clock path: 1.
+[INFO CTS-0015]     Created 1 clock nets.
+[INFO CTS-0016]     Fanout distribution for the current clock = 16:1..
+[INFO CTS-0017]     Max level of the clock tree: 0.
+[INFO CTS-0202] Non-default rule CTS_NDR_0 for double spacing has been applied to 1 clock nets
 [INFO CTS-0098] Clock net "clk"
-[INFO CTS-0099]  Sinks 17
+[INFO CTS-0099]  Sinks 16
 [INFO CTS-0100]  Leaf buffers 0
-[INFO CTS-0101]  Average sink wire length 23.08 um
-[INFO CTS-0102]  Path depth 2 - 2
-[INFO CTS-0207]  Leaf load cells 1
+[INFO CTS-0101]  Average sink wire length 18.28 um
+[INFO CTS-0102]  Path depth 1 - 1
+[INFO CTS-0207]  Leaf load cells 0
 No differences found.

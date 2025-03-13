@@ -18,10 +18,8 @@ NONDEFAULTRULES 1 ;
       + LAYER metal10 WIDTH 1600 SPACING 3200
     ;
 END NONDEFAULTRULES
-COMPONENTS 19 ;
+COMPONENTS 17 ;
     - clkbuf_0_clk CLKBUF_X3 + SOURCE TIMING + PLACED ( 13230 11230 ) N ;
-    - clkbuf_1_0__f_clk CLKBUF_X3 + SOURCE TIMING + PLACED ( 13229 -2769 ) N ;
-    - clkbuf_1_1__f_clk CLKBUF_X3 + SOURCE TIMING + PLACED ( 13229 25230 ) N ;
     - ff1 DFF_X1 + PLACED ( 500 500 ) N ;
     - ff10 DFF_X1 + PLACED ( 12000 19500 ) N ;
     - ff11 DFF_X1 + PLACED ( 18000 19500 ) N ;
@@ -45,12 +43,10 @@ PINS 1 ;
         + LAYER metal6 ( -140 -140 ) ( 140 140 )
         + FIXED ( 10000 19860 ) N ;
 END PINS
-NETS 4 ;
+NETS 2 ;
     - clk ( PIN clk ) ( clkbuf_0_clk A ) + USE CLOCK + NONDEFAULTRULE CTS_NDR_0 ;
-    - clknet_0_clk ( clkbuf_1_1__f_clk A ) ( clkbuf_1_0__f_clk A ) ( clkbuf_0_clk Z ) + USE CLOCK + NONDEFAULTRULE CTS_NDR_0 ;
-    - clknet_1_0__leaf_clk ( ff15 CK ) ( ff13 CK ) ( ff6 CK ) ( ff5 CK ) ( ff4 CK ) ( ff3 CK ) ( ff2 CK )
-      ( ff1 CK ) ( clkbuf_1_0__f_clk Z ) + USE CLOCK ;
-    - clknet_1_1__leaf_clk ( ff16 CK ) ( ff14 CK ) ( ff12 CK ) ( ff11 CK ) ( ff10 CK ) ( ff9 CK ) ( ff8 CK )
-      ( ff7 CK ) ( clkbuf_1_1__f_clk Z ) + USE CLOCK ;
+    - clknet_0_clk ( ff16 CK ) ( ff15 CK ) ( ff14 CK ) ( ff13 CK ) ( ff12 CK ) ( ff11 CK ) ( ff10 CK )
+      ( ff9 CK ) ( ff8 CK ) ( ff7 CK ) ( ff6 CK ) ( ff5 CK ) ( ff4 CK ) ( ff3 CK ) ( ff2 CK )
+      ( ff1 CK ) ( clkbuf_0_clk Z ) + USE CLOCK ;
 END NETS
 END DESIGN

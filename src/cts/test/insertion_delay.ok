@@ -26,13 +26,7 @@
 [INFO CTS-0024]  Normalized sink region: [(0.407143, 3.6), (0.407143, 3.6)].
 [INFO CTS-0025]     Width:  0.0000.
 [INFO CTS-0026]     Height: 0.0000.
- Level 1
-    Direction: Vertical
-    Sinks per sub-region: 1
-    Sub-region size: 0.0000 X 0.0000
-[INFO CTS-0034]     Segment length (rounded): 1.
-[INFO CTS-0032]  Stop criterion found. Max number of sinks is 15.
-[INFO CTS-0035]  Number of sinks covered: 1.
+ Building single-buffer clock net.
 [INFO CTS-0200] 0 placement blockages have been identified.
 [INFO CTS-0201] 1 placed hard macros will be treated like blockages.
 [INFO CTS-0027] Generating H-Tree topology for net clk_regs.
@@ -54,12 +48,12 @@
 [INFO CTS-0034]     Segment length (rounded): 4.
 [INFO CTS-0032]  Stop criterion found. Max number of sinks is 15.
 [INFO CTS-0035]  Number of sinks covered: 28.
-[INFO CTS-0018]     Created 2 clock buffers.
-[INFO CTS-0012]     Minimum number of buffers in the clock path: 2.
-[INFO CTS-0013]     Maximum number of buffers in the clock path: 2.
-[INFO CTS-0015]     Created 2 clock nets.
+[INFO CTS-0018]     Created 1 clock buffers.
+[INFO CTS-0012]     Minimum number of buffers in the clock path: 1.
+[INFO CTS-0013]     Maximum number of buffers in the clock path: 1.
+[INFO CTS-0015]     Created 1 clock nets.
 [INFO CTS-0016]     Fanout distribution for the current clock = 1:1..
-[INFO CTS-0017]     Max level of the clock tree: 1.
+[INFO CTS-0017]     Max level of the clock tree: 0.
 [INFO CTS-0018]     Created 31 clock buffers.
 [INFO CTS-0012]     Minimum number of buffers in the clock path: 3.
 [INFO CTS-0013]     Maximum number of buffers in the clock path: 3.

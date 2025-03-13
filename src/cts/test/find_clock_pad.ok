@@ -25,23 +25,17 @@
 [INFO CTS-0024]  Normalized sink region: [(0.266429, 0.123571), (0.337857, 0.195)].
 [INFO CTS-0025]     Width:  0.0714.
 [INFO CTS-0026]     Height: 0.0714.
- Level 1
-    Direction: Vertical
-    Sinks per sub-region: 1
-    Sub-region size: 0.0714 X 0.0357
-[INFO CTS-0034]     Segment length (rounded): 1.
-[INFO CTS-0032]  Stop criterion found. Max number of sinks is 15.
-[INFO CTS-0035]  Number of sinks covered: 2.
-[INFO CTS-0018]     Created 3 clock buffers.
-[INFO CTS-0012]     Minimum number of buffers in the clock path: 2.
-[INFO CTS-0013]     Maximum number of buffers in the clock path: 2.
-[INFO CTS-0015]     Created 3 clock nets.
-[INFO CTS-0016]     Fanout distribution for the current clock = 1:2..
-[INFO CTS-0017]     Max level of the clock tree: 1.
+ Building single-buffer clock net.
+[INFO CTS-0018]     Created 1 clock buffers.
+[INFO CTS-0012]     Minimum number of buffers in the clock path: 1.
+[INFO CTS-0013]     Maximum number of buffers in the clock path: 1.
+[INFO CTS-0015]     Created 1 clock nets.
+[INFO CTS-0016]     Fanout distribution for the current clock = 2:1..
+[INFO CTS-0017]     Max level of the clock tree: 0.
 [WARNING ODB-0034] Can not find physical location of iterm p1/Y
 [INFO CTS-0098] Clock net "clk2"
 [INFO CTS-0099]  Sinks 2
 [INFO CTS-0100]  Leaf buffers 0
-[INFO CTS-0101]  Average sink wire length 17.47 um
-[INFO CTS-0102]  Path depth 2 - 2
+[INFO CTS-0101]  Average sink wire length 5.15 um
+[INFO CTS-0102]  Path depth 1 - 1
 [INFO CTS-0207]  Leaf load cells 0
