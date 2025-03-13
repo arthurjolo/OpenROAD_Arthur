@@ -2009,6 +2009,7 @@ void HTreeBuilder::createSingleBufferClockNet()
   addTreeLevelBuffer(&rootBuffer);
   ClockSubNet& clockSubNet = clock_.addSubNet("clknet_0");
   clockSubNet.addInst(rootBuffer);
+  clockSubNet.setLeafLevel(true);
 
   clock_.forEachSink([&](ClockInst& inst) { clockSubNet.addInst(inst); });
 }

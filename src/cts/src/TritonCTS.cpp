@@ -1470,6 +1470,11 @@ void TritonCTS::writeClockNetsToDb(TreeBuilder* builder,
     }
   });
 
+  if(rootSubNet->isLeafLevel()) {
+    minPath = 1;
+    maxPath = 1;
+  }
+
   logger_->info(
       CTS, 12, "    Minimum number of buffers in the clock path: {}.", minPath);
   logger_->info(
