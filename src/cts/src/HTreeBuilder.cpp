@@ -1203,12 +1203,13 @@ void HTreeBuilder::run()
 
   initSinkRegion();
 
-  const unsigned numSinksOn0
-        = computeNumberOfSinksPerSubRegion(0);
+  const unsigned numSinksOn0 = computeNumberOfSinksPerSubRegion(0);
   double regionWidth, regionHeight;
-        computeSubRegionSize(0, regionWidth, regionHeight);
+  computeSubRegionSize(0, regionWidth, regionHeight);
 
-  if((options_->getMaxFanout() && !isNumberOfSinksTooSmall(numSinksOn0)) || (!options_->getMaxFanout() && !isSubRegionTooSmall(regionWidth, regionHeight))) {
+  if ((options_->getMaxFanout() && !isNumberOfSinksTooSmall(numSinksOn0))
+      || (!options_->getMaxFanout()
+          && !isSubRegionTooSmall(regionWidth, regionHeight))) {
     for (int level = 1; level <= clockTreeMaxDepth_; ++level) {
       const unsigned numSinksPerSubRegion
           = computeNumberOfSinksPerSubRegion(level);
@@ -1237,7 +1238,7 @@ void HTreeBuilder::run()
                       32,
                       " Stop criterion found. Max number of sinks is {}.",
                       options_->getMaxFanout() ? options_->getMaxFanout()
-                                              : numMaxLeafSinks_);
+                                               : numMaxLeafSinks_);
         break;
       }
     }
