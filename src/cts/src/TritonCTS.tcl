@@ -50,6 +50,7 @@ sta::define_cmd_args "clock_tree_synthesis" {[-wire_unit unit]
                                              [-macro_clustering_size] \
                                              [-macro_clustering_max_diameter] \
                                              [-sink_clustering_enable] \
+                                             [-no_macro_clustering] \
                                              [-balance_levels] \
                                              [-sink_clustering_levels levels] \
                                              [-num_static_layers] \
@@ -73,8 +74,8 @@ proc clock_tree_synthesis { args } {
           -macro_clustering_size -macro_clustering_max_diameter \
           -sink_clustering_levels -tree_buf \
           -sink_buffer_max_cap_derate -delay_buffer_derate -library} \
-    flags {-post_cts_disable -sink_clustering_enable -balance_levels \
-           -obstruction_aware -no_obstruction_aware -apply_ndr \
+    flags {-post_cts_disable -sink_clustering_enable -no_macro_clustering \
+           -balance_levels -obstruction_aware -no_obstruction_aware -apply_ndr \
            -dont_use_dummy_load
   } ;# checker off
 
@@ -90,6 +91,10 @@ proc clock_tree_synthesis { args } {
   }
 
   cts::set_sink_clustering [info exists flags(-sink_clustering_enable)]
+
+  if { [info exists flags(-no_macro_clustering)] } {
+    cts::set_macro_clustering false
+  }
 
   if { [info exists keys(-sink_clustering_size)] } {
     set size $keys(-sink_clustering_size)

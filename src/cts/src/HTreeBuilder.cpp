@@ -30,6 +30,9 @@ void HTreeBuilder::preSinkClustering(
     const unsigned clusterSize,
     const bool secondLevel)
 {
+  bool clusteringEnabled = (type_ == TreeType::MacroTree)
+                            ? options_->getMacroClustering()
+                            : options_->getSinkClustering();
   bool maxDiameterSet = (type_ == TreeType::MacroTree)
                             ? options_->isMacroMaxDiameterSet()
                             : options_->isMaxDiameterSet();
@@ -60,7 +63,7 @@ void HTreeBuilder::preSinkClustering(
   }
 
   if (sinks.size() <= min_clustering_sinks
-      || !(options_->getSinkClustering())) {
+      || !clusteringEnabled) {
     topLevelSinksClustered_ = sinks;
     return;
   }
@@ -249,6 +252,9 @@ void HTreeBuilder::initSinkRegion()
   const int dbUnits = options_->getDbUnits();
   wireSegmentUnit_ = wireSegmentUnitInDbu;
 
+  bool clusteringEnabled = (type_ == TreeType::MacroTree)
+                            ? options_->getMacroClustering()
+                            : options_->getSinkClustering();
   double clusterDiameter = (type_ == TreeType::MacroTree)
                                ? options_->getMacroMaxDiameter()
                                : options_->getMaxDiameter();
@@ -299,7 +305,7 @@ void HTreeBuilder::initSinkRegion()
 
   preSinkClustering(topLevelSinks, sinkInsts, maxDiameter, clusterSize);
   if (topLevelSinks.size() <= min_clustering_sinks
-      || !(options_->getSinkClustering())) {
+      || !clusteringEnabled) {
     Box<int> sinkRegionDbu = clock_.computeSinkRegion();
     logger_->info(CTS, 23, " Original sink region: {}.", sinkRegionDbu);
 
@@ -1171,6 +1177,9 @@ void HTreeBuilder::legalize()
 
 void HTreeBuilder::run()
 {
+  bool clusteringEnabled = (type_ == TreeType::MacroTree)
+                            ? options_->getMacroClustering()
+                            : options_->getSinkClustering();
   double clusterDiameter = (type_ == TreeType::MacroTree)
                                ? options_->getMacroMaxDiameter()
                                : options_->getMaxDiameter();
@@ -1184,7 +1193,7 @@ void HTreeBuilder::run()
   logger_->info(
       CTS, 27, "Generating H-Tree topology for net {}.", clock_.getName());
   logger_->info(CTS, 28, " Total number of sinks: {}.", clock_.getNumSinks());
-  if (options_->getSinkClustering()) {
+  if (clusteringEnabled) {
     if (useMaxCap) {
       logger_->info(
           CTS, 90, " Sinks will be clustered based on buffer max cap.");
@@ -1344,12 +1353,15 @@ std::string HTreeBuilder::plotHTree()
 unsigned HTreeBuilder::computeNumberOfSinksPerSubRegion(
     const unsigned level) const
 {
+  bool clusteringEnabled = (type_ == TreeType::MacroTree)
+                            ? options_->getMacroClustering()
+                            : options_->getSinkClustering();
   unsigned min_clustering_sinks = (type_ == TreeType::MacroTree)
                                       ? min_clustering_macro_sinks_
                                       : min_clustering_sinks_;
   unsigned totalNumSinks = 0;
   if (clock_.getNumSinks() > min_clustering_sinks
-      && options_->getSinkClustering()) {
+      && clusteringEnabled) {
     totalNumSinks = topLevelSinksClustered_.size();
   } else {
     totalNumSinks = clock_.getNumSinks();

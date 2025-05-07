@@ -35,6 +35,12 @@ set_sink_clustering(bool enable)
 }
 
 void
+set_macro_clustering(bool enable)
+{
+  getTritonCts()->getParms()->setMacroClustering(enable);
+}
+
+void
 set_plot_option(bool plot)
 {
   getTritonCts()->getParms()->setPlotSolution(plot);

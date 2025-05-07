@@ -66,6 +66,8 @@ class CtsOptions : public odb::dbBlockCallBackObj
 
   void setSinkClustering(bool enable) { sinkClusteringEnable_ = enable; }
   bool getSinkClustering() const { return sinkClusteringEnable_; }
+  void setMacroClustering(bool enable) { macroClusteringEnable_ = enable; }
+  bool getMacroClustering() const { return macroClusteringEnable_; }
   void setSinkClusteringUseMaxCap(bool useMaxCap)
   {
     sinkClusteringUseMaxCap_ = useMaxCap;
@@ -271,6 +273,7 @@ class CtsOptions : public odb::dbBlockCallBackObj
   unsigned wireSegmentUnit_ = 0;
   bool plotSolution_ = false;
   bool sinkClusteringEnable_ = true;
+  bool macroClusteringEnable_ = true;
   bool sinkClusteringUseMaxCap_ = true;
   bool simpleSegmentsEnable_ = false;
   bool vertexBuffersEnable_ = false;
