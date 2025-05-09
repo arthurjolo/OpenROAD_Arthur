@@ -191,8 +191,10 @@ class TritonCTS
                                unsigned& numSinks,
                                sta::Graph* graph);
   bool propagateClock(odb::dbITerm* input);
-  void adjustLatencies(TreeBuilder* macroBuilder, TreeBuilder* registerBuilder);
-  void computeTopBufferDelay(TreeBuilder* builder);
+  void adjustLatencies(TreeBuilder* macroBuilder,
+                       TreeBuilder* registerBuilder,
+                       sta::Graph* graph);
+  void computeTopBufferDelay(TreeBuilder* builder, sta::Graph* graph);
   odb::dbInst* insertDelayBuffer(odb::dbInst* driver,
                                  const std::string& clockName,
                                  int locX,

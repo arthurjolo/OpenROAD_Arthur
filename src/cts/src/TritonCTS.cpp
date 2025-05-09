@@ -2165,7 +2165,7 @@ void TritonCTS::balanceMacroRegisterLatencies()
         openSta_->updateTiming(false);
         computeAveSinkArrivals(registerBuilder, graph);
         computeAveSinkArrivals(macroBuilder, graph);
-        adjustLatencies(macroBuilder, registerBuilder);
+        adjustLatencies(macroBuilder, registerBuilder, graph);
       }
     }
   }
@@ -2341,11 +2341,12 @@ bool TritonCTS::propagateClock(odb::dbITerm* input)
 // Balance latencies between macro tree and register tree
 // by adding delay buffers to one tree
 void TritonCTS::adjustLatencies(TreeBuilder* macroBuilder,
-                                TreeBuilder* registerBuilder)
+                                TreeBuilder* registerBuilder,
+                                sta::Graph* graph)
 {
   // compute top buffer delays
-  computeTopBufferDelay(registerBuilder);
-  computeTopBufferDelay(macroBuilder);
+  computeTopBufferDelay(registerBuilder, graph);
+  computeTopBufferDelay(macroBuilder, graph);
 
   float latencyDiff = macroBuilder->getAveSinkArrival()
                       - registerBuilder->getAveSinkArrival();
@@ -2414,7 +2415,8 @@ void TritonCTS::adjustLatencies(TreeBuilder* macroBuilder,
   driverOutputTerm->connect(outputNet);
 }
 
-void TritonCTS::computeTopBufferDelay(TreeBuilder* builder)
+void TritonCTS::computeTopBufferDelay(TreeBuilder* builder,
+                                      sta::Graph* graph)
 {
   Clock clock = builder->getClock();
   std::string topBufferName;
@@ -2424,6 +2426,11 @@ void TritonCTS::computeTopBufferDelay(TreeBuilder* builder)
     topBufferName = "clkbuf_0_" + clock.getName();
   }
   odb::dbInst* topBuffer = block_->findInst(topBufferName.c_str());
+  odb::dbNet* topInputClockNet = clock.getNetObj();
+  if (builder->getTopInputNet() != nullptr) {
+    topInputClockNet = builder->getTopInputNet();
+  }
+
   if (topBuffer) {
     builder->setTopBuffer(topBuffer);
     odb::dbITerm* inputTerm = getFirstInput(topBuffer);
@@ -2431,10 +2438,10 @@ void TritonCTS::computeTopBufferDelay(TreeBuilder* builder)
     sta::Pin* inputPin = network_->dbToSta(inputTerm);
     sta::Pin* outputPin = network_->dbToSta(outputTerm);
 
-    float inputArrival = openSta_->pinArrival(
-        inputPin, sta::RiseFall::rise(), sta::MinMax::max());
-    float outputArrival = openSta_->pinArrival(
-        outputPin, sta::RiseFall::rise(), sta::MinMax::max());
+    sta::Vertex* inputVertex = graph->pinDrvrVertex(inputPin);
+    sta::Vertex* outputVertex = graph->pinDrvrVertex(outputPin);
+    float inputArrival = getVertexClkArrival(inputVertex, topInputClockNet, inputTerm);
+    float outputArrival = getVertexClkArrival(outputVertex, topInputClockNet, outputTerm);
     float bufferDelay = outputArrival - inputArrival;
     builder->setTopBufferDelay(bufferDelay);
     debugPrint(logger_,
