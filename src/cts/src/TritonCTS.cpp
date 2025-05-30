@@ -24,6 +24,7 @@
 #include "CtsOptions.h"
 #include "HTreeBuilder.h"
 #include "LevelBalancer.h"
+#include "LatenciesBalancer.h"
 #include "TechChar.h"
 #include "TreeBuilder.h"
 #include "db_sta/dbNetwork.hh"
@@ -2154,21 +2155,12 @@ void TritonCTS::balanceMacroRegisterLatencies()
 
   // Visit builders from bottom up such that latencies are adjusted near bottom
   // trees first
-  openSta_->ensureGraph();
-  openSta_->searchPreamble();
-  openSta_->ensureClkNetwork();
   sta::Graph* graph = openSta_->graph();
   for (auto iter = builders_.rbegin(); iter != builders_.rend(); ++iter) {
-    TreeBuilder* registerBuilder = iter->get();
-    if (registerBuilder->getTreeType() == TreeType::RegisterTree) {
-      TreeBuilder* macroBuilder = registerBuilder->getParent();
-      if (macroBuilder) {
-        // Update graph information after possible buffers inserted
-        openSta_->updateTiming(false);
-        computeAveSinkArrivals(registerBuilder, graph);
-        computeAveSinkArrivals(macroBuilder, graph);
-        adjustLatencies(macroBuilder, registerBuilder);
-      }
+    TreeBuilder* builder = iter->get();
+    if (builder->getParent() == nullptr) {
+      LatenciesBalancer balancer = LatenciesBalancer(builder, options_, logger_, db_, network_, openSta_, techChar_->getLengthUnit());
+      balancer.run();
     }
   }
 }
