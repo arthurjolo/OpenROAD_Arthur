@@ -59,6 +59,7 @@ class LatenciesBalancer
                 const CtsOptions* options,
                 Logger* logger,
                 odb::dbDatabase* db,
+                rsz::Resizer* resizer,
                 sta::dbNetwork* network,
                 sta::dbSta* sta,
                 double scalingUnit)
@@ -66,6 +67,7 @@ class LatenciesBalancer
         options_(options),
         logger_(logger),
         db_(db),
+        resizer_(resizer),
         network_(network),
         openSta_(sta),
         wireSegmentUnit_(scalingUnit)
@@ -83,12 +85,11 @@ class LatenciesBalancer
   float getVertexClkArrival(sta::Vertex* sinkVertex,
                                      odb::dbNet* topNet,
                                      odb::dbITerm* iterm);
-  void computeAveSinkArrivals(TreeBuilder* builder);
+  float computeAveSinkArrivals(TreeBuilder* builder);
   void computeSinkArrivalRecur(odb::dbNet* topClokcNet,
                                         odb::dbITerm* iterm,
                                         float& sumArrivals,
                                         unsigned& numSinks);
-  void computeTopBufferDelay(TreeBuilder* builder);
   void computeLeafsNumBufferToInsert(int nodeId);
   bool propagateClock(odb::dbITerm* input);
   bool isSink(odb::dbITerm* iterm);
@@ -97,6 +98,7 @@ class LatenciesBalancer
   const CtsOptions* options_ = nullptr;
   Logger* logger_ = nullptr;
   odb::dbDatabase* db_ = nullptr;
+  rsz::Resizer* resizer_ = nullptr;
   sta::dbNetwork* network_ = nullptr;
   sta::dbSta* openSta_ = nullptr;
   sta::Graph* timingGraph_ = nullptr;

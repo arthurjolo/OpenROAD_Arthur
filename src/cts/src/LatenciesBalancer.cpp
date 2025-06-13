@@ -30,12 +30,12 @@ using utl::CTS;
 void LatenciesBalancer::run()
 {
   initSta();
-  computeTopBufferDelay(root_);
   findAllBuilders(root_);
   computeLeafsNumBufferToInsert(0);
 }
 
 void LatenciesBalancer::initSta() {
+  resizer_->estimateParasitics(rsz::ParasiticsSrc::placement);
   openSta_->ensureGraph();
   openSta_->searchPreamble();
   openSta_->ensureClkNetwork();
@@ -68,7 +68,6 @@ void LatenciesBalancer::expandBuilderGraph(TreeBuilder* builder)
   odb::dbNet* topBufInputNet = builderTopBufInputTerm->getNet();
   odb::dbITerm* builderDriverTerm = topBufInputNet->getFirstOutput();
   std::string builderSrcName;
-
   if(!builderDriverTerm) {
     builderSrcName = topBufInputNet->getName();
   } else {
@@ -91,9 +90,9 @@ void LatenciesBalancer::expandBuilderGraph(TreeBuilder* builder)
   // If the builder is leaf don't expand it, as we don't want to insert delay
   // inside this tree
   if(builder->isLeafTree()) {
-    computeAveSinkArrivals(builder);
-    worseDelay_ = std::max(worseDelay_, builder->getAveSinkArrival());
-    graph_[topBufId].delay = builder->getAveSinkArrival();
+    float builerAvgArrival = computeAveSinkArrivals(builder);
+    worseDelay_ = std::max(worseDelay_, builerAvgArrival);
+    graph_[topBufId].delay = builerAvgArrival;
     return;
   }
 
@@ -195,7 +194,7 @@ float LatenciesBalancer::getVertexClkArrival(sta::Vertex* sinkVertex,
   return clkPathArrival;
 }
 
-void LatenciesBalancer::computeAveSinkArrivals(TreeBuilder* builder)
+float LatenciesBalancer::computeAveSinkArrivals(TreeBuilder* builder)
 {
   Clock clock = builder->getClock();
   odb::dbNet* topInputClockNet = builder->getTopInputNet();
@@ -208,7 +207,6 @@ void LatenciesBalancer::computeAveSinkArrivals(TreeBuilder* builder)
         topInputClockNet, iterm, sumArrivals, numSinks);
   });
   float aveArrival = sumArrivals / (float) numSinks;
-  builder->setAveSinkArrival(aveArrival);
   debugPrint(logger_,
              CTS,
              "insertion delay",
@@ -218,6 +216,7 @@ void LatenciesBalancer::computeAveSinkArrivals(TreeBuilder* builder)
                                                              : "register tree",
              clock.getName(),
              builder->getAveSinkArrival());
+  return aveArrival;
 }
 
 void LatenciesBalancer::computeSinkArrivalRecur(odb::dbNet* topClokcNet,
@@ -276,37 +275,6 @@ void LatenciesBalancer::computeSinkArrivalRecur(odb::dbNet* topClokcNet,
         }
       }
     }
-  }
-}
-
-void LatenciesBalancer::computeTopBufferDelay(TreeBuilder* builder)
-{
-  Clock clock = builder->getClock();
-  odb::dbBlock* block = db_->getChip()->getBlock();
-  odb::dbInst* topBuffer = block->findInst(builder->getTopBufferName().c_str());
-  if (topBuffer) {
-    builder->setTopBuffer(topBuffer);
-    odb::dbITerm* inputTerm = getFirstInput(topBuffer);
-    odb::dbITerm* outputTerm = topBuffer->getFirstOutput();
-    sta::Pin* inputPin = network_->dbToSta(inputTerm);
-    sta::Pin* outputPin = network_->dbToSta(outputTerm);
-
-    float inputArrival = openSta_->pinArrival(
-        inputPin, sta::RiseFall::rise(), sta::MinMax::max());
-    float outputArrival = openSta_->pinArrival(
-        outputPin, sta::RiseFall::rise(), sta::MinMax::max());
-    float bufferDelay = outputArrival - inputArrival;
-    builder->setTopBufferDelay(bufferDelay);
-    debugPrint(logger_,
-               CTS,
-               "insertion delay",
-               1,
-               "top buffer delay for {} {} is {:0.3e}",
-               (builder->getTreeType() == TreeType::MacroTree)
-                   ? "macro tree"
-                   : "register tree",
-               topBuffer->getName(),
-               builder->getTopBufferDelay());
   }
 }
 
