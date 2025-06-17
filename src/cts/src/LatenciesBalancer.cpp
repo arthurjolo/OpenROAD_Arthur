@@ -79,13 +79,13 @@ void LatenciesBalancer::expandBuilderGraph(TreeBuilder* builder)
   int builderSrcId = getNodeIdByName(builderSrcName);
   if(builderSrcId == -1) {
     builderSrcId = graph_.size();
-    GraphNode builderSrcNode = GraphNode(builderSrcId, builderSrcName, -1, topBufInputNet->getFirstOutput());
+    GraphNode builderSrcNode = GraphNode(builderSrcId, builderSrcName, topBufInputNet->getFirstOutput());
     graph_.push_back(builderSrcNode);
   }
 
   // Create the node for the root of the tree
   int topBufId = graph_.size();
-  GraphNode topBufNode = GraphNode(topBufId, topBufferName, builderSrcId, builderTopBufInputTerm);
+  GraphNode topBufNode = GraphNode(topBufId, topBufferName, builderTopBufInputTerm);
   graph_.push_back(topBufNode);
   graph_[builderSrcId].childrenIds.push_back(topBufId);
 
@@ -97,16 +97,12 @@ void LatenciesBalancer::expandBuilderGraph(TreeBuilder* builder)
     graph_[topBufId].delay = builerAvgArrival;
     return;
   }
-
+  std::map<std::string, std::vector<int>> not_created_nodes;
   // Expand clock tree to possibly insert delay
   Clock& clockNet = builder->getClock();
   clockNet.forEachSubNet([&](ClockSubNet& subNet) {
     odb::dbInst* driver = subNet.getDriver()->getDbInst();
     int driverId = getNodeIdByName(driver->getName());
-    
-    if(driverId == -1) {
-      logger_->error(CTS, 545, "Could not find node for driver: {}", driver->getName());
-    }
 
     subNet.forEachSink([&](ClockInst* inst) {
       int sinkId = graph_.size();
@@ -117,9 +113,17 @@ void LatenciesBalancer::expandBuilderGraph(TreeBuilder* builder)
       } else {
         sinkName = inst->getName();
       }
-      GraphNode sinkNode = GraphNode(sinkId, sinkName, driverId, sinkIterm);
+      GraphNode sinkNode = GraphNode(sinkId, sinkName, sinkIterm);
+      if(driverId == -1) {
+        not_created_nodes[driver->getName()].push_back(sinkId);
+      } else {
+        graph_[driverId].childrenIds.push_back(sinkId);
+      }
+
+      if(not_created_nodes.find(sinkName) !=  not_created_nodes.end()) {
+        sinkNode.childrenIds = not_created_nodes[sinkName];
+      }
       graph_.push_back(sinkNode);
-      graph_[driverId].childrenIds.push_back(sinkId);
     });
   });
 }
@@ -494,7 +498,6 @@ void LatenciesBalancer::showGraph() {
     odb::dbITerm* inputTerm = node.inputTerm;
     logger_->report(" Node {}", node.name);
     logger_->report("   id       = {}", node.id);
-    logger_->report("   parent   = {}", node.parentId);
     logger_->report("   delay    = {}", node.delay);
     logger_->report("   n buffer = {}", node.nBuffInsert);
     logger_->report("   in Term  = {}", inputTerm == nullptr ? "no dbITerm" : inputTerm->getName());

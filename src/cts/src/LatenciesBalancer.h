@@ -37,18 +37,15 @@ struct GraphNode
 {
   GraphNode(int id,
        std::string name,
-       int parentId,
        odb::dbITerm* inputTerm)
     : id(id),
       name(name),
-      parentId(parentId),
       inputTerm(inputTerm)
     {
     }
 
   int id;
   std::string name;
-  int parentId;
   std::vector<int> childrenIds;
   float delay = 0.0;
   int nBuffInsert = 0;
