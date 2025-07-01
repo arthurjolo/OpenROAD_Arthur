@@ -33,6 +33,7 @@ void LatenciesBalancer::run()
   delayBufIndex_ = 0;
   initSta();
   findAllBuilders(root_);
+  expandBuilderGraph(root_->getTopInputNet());
   computeLeafsNumBufferToInsert(0);
   debugPrint(logger_, CTS, "insertion delay", 1, "inserted {} delay buffers.", delayBufIndex_);
 }
@@ -46,11 +47,77 @@ void LatenciesBalancer::initSta() {
 
 void LatenciesBalancer::findAllBuilders(TreeBuilder* builder)
 {
-  expandBuilderGraph(builder);
+  std::string topBufferName = builder->getTopBufferName();
+  odb::dbBlock* block = db_->getChip()->getBlock();
+  odb::dbInst* topBuffer = block->findInst(topBufferName.c_str());
+  inst2builder_[topBufferName] = builder;
   for (const auto& child : builder->getChildren()) {
     findAllBuilders(child);
   }
 }
+
+void LatenciesBalancer::expandBuilderGraph(odb::dbNet* clkInputNet)
+{
+  std::string builderSrcName;
+  if(!clkInputNet->getFirstOutput()) {
+    builderSrcName = clkInputNet->getName();
+  } else {
+    builderSrcName = clkInputNet->getFirstOutput()->getInst()->getName();
+  }
+  int builderSrcId = graph_.size();
+  GraphNode builderSrcNode = GraphNode(builderSrcId, builderSrcName, clkInputNet->getFirstOutput());
+  graph_.push_back(builderSrcNode);
+
+  std::stack<odb::dbInst*> visitInst;
+
+  for(odb::dbITerm* iterm : clkInputNet->getITerms()) {
+    if(iterm->getIoType() == odb::dbIoType::INPUT) {
+      int id = graph_.size();
+      GraphNode topBufNode = GraphNode(id, iterm->getInst()->getName(), iterm);
+      graph_.push_back(topBufNode);
+      graph_[builderSrcId].childrenIds.push_back(id);
+      if(inst2builder_.find(iterm->getInst()->getName()) != inst2builder_.end()) {
+        auto builder = inst2builder_[iterm->getInst()->getName()];
+        if(builder->isLeafTree()) {
+          float builerAvgArrival = computeAveSinkArrivals(builder);
+          worseDelay_ = std::max(worseDelay_, builerAvgArrival);
+          graph_[id].delay = builerAvgArrival;
+          continue;
+        }
+      }
+      visitInst.push(iterm->getInst());
+    }
+  }
+
+  while(!visitInst.empty()) {
+    odb::dbInst* driver = visitInst.top();
+    visitInst.pop();
+    int driverId = getNodeIdByName(driver->getName());
+    odb::dbITerm* firstOutput = driver->getFirstOutput();
+    odb::dbNet* net = firstOutput->getNet();
+    for(odb::dbITerm* sinkIterm : net->getITerms()) {
+      if(sinkIterm->getIoType() == odb::dbIoType::INPUT) {
+        odb::dbInst* sinkInst = sinkIterm->getInst();
+        int sinkId = graph_.size();
+        std::string sinkName = sinkInst->getName();
+        GraphNode sinkNode = GraphNode(sinkId, sinkName, sinkIterm);
+        graph_.push_back(sinkNode);
+        graph_[driverId].childrenIds.push_back(sinkId);
+
+        if(inst2builder_.find(sinkName) != inst2builder_.end()) {
+          auto builder = inst2builder_[sinkName];
+          if(builder->isLeafTree()) {
+            float builerAvgArrival = computeAveSinkArrivals(builder);
+            worseDelay_ = std::max(worseDelay_, builerAvgArrival);
+            graph_[sinkId].delay = builerAvgArrival;
+            continue;
+          }
+        }
+        visitInst.push(sinkInst);
+      }
+    }
+  }
+}  
 
 void LatenciesBalancer::expandBuilderGraph(TreeBuilder* builder)
 {
