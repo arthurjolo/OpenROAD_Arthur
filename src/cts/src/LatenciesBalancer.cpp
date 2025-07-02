@@ -95,6 +95,9 @@ void LatenciesBalancer::expandBuilderGraph(odb::dbNet* clkInputNet)
     int driverId = getNodeIdByName(driver->getName());
     odb::dbITerm* firstOutput = driver->getFirstOutput();
     odb::dbNet* net = firstOutput->getNet();
+    if(!net) {
+      continue;
+    }
     for(odb::dbITerm* sinkIterm : net->getITerms()) {
       if(sinkIterm->getIoType() == odb::dbIoType::INPUT) {
         odb::dbInst* sinkInst = sinkIterm->getInst();
@@ -357,14 +360,16 @@ void LatenciesBalancer::computeLeafsNumBufferToInsert(int nodeId) {
   GraphNode* node = &graph_[nodeId];
   // Compute number of buffer needed for leaf node
   if(node->childrenIds.empty()) {
-    debugPrint(logger_,
-               CTS,
-               "insertion delay",
-               1,
-               "For node {}, isert {:2f} buffers",
-               node->name,
-               (worseDelay_ - node->delay) / root_->getTopBufferDelay());
-    node->nBuffInsert = (int) ((worseDelay_ - node->delay) / root_->getTopBufferDelay());
+    if(node->delay != 0.0) {
+      debugPrint(logger_,
+                 CTS,
+                 "insertion delay",
+                 1,
+                 "For node {}, isert {:2f} buffers",
+                 node->name,
+                 (worseDelay_ - node->delay) / root_->getTopBufferDelay());
+      node->nBuffInsert = (int) ((worseDelay_ - node->delay) / root_->getTopBufferDelay());
+    }
     return;
   }
 
