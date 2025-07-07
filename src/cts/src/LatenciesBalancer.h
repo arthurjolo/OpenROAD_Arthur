@@ -48,7 +48,7 @@ struct GraphNode
   std::string name;
   std::vector<int> childrenIds;
   float delay = 0.0;
-  int nBuffInsert = 0;
+  int nBuffInsert = -1;
   odb::dbITerm* inputTerm = nullptr;
 };
 

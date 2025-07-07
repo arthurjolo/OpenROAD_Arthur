@@ -402,6 +402,8 @@ void LatenciesBalancer::computeLeafsNumBufferToInsert(int nodeId) {
       sinksInput.clear();
       sinksInput = childs;      
       continue;
+    } else if(buf_to_insert == -1) {
+      continue;
     }
 
     int numBuffers = previous_buf_to_insert - buf_to_insert;
